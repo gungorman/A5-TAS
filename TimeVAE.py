@@ -8,5 +8,5 @@ if number == x:
     print("Antonio Peqenio is stoopid")
 
 else:
-    print("Good Job")
+    print("Good Job u dont have the same number")
     
