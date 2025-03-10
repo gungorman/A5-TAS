@@ -8,4 +8,4 @@ def load_data(files):
     return extracted_data
 
 
-print(load_data(r"C:\\Users\\chris\\OneDrive\\Documenten\\Chris\\Q3 2024-2025\\Project\\stockv_subsampled_train_perc_10.npz"))
+print(load_data(r"Processing\air_subsampled_train_perc_10.npz"))
