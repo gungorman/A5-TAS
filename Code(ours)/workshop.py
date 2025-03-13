@@ -7,22 +7,16 @@ array=df[['flight_id', 'timedelta', 'latitude','longitude','altitude']].values
 samples=[]
 timesteps=[]
 features= []
+MainList = []
 for i in range(len(array)):
-    samples.append(array[i][0])
-    timesteps.append(array[i][1])
-    features.append(array[i][2:5])
+    MainList.append([array[i][0], array[i][1], array[i][2:5]])
     
-    
-samples=np.array(samples)
-timesteps=np.array(timesteps)
-features=np.array(features)
-MainList=[samples, timesteps, features]
+for i in range(len(MainList)):
+    print(MainList[i])
 
-
-print(MainList)
 
 # Save the array to a NPZ file
-np.savez('Code(ours)/data.npz', array)
+np.savez('Code(ours)/data.npz', MainList)
 
 
 
