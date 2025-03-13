@@ -14,7 +14,7 @@ from data_utils import (
     save_data,
 )
 import paths
-from vae.vae_utils import (
+from VAE.vae_utils import (
     instantiate_vae_model,
     train_vae,
     save_vae_model,
