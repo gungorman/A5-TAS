@@ -3,10 +3,20 @@ import numpy as np
 # Load the CSV file into a Pandas DataFrame
 df = pd.read_csv('Code(ours)/traj.csv')
 # Convert the DataFrame to a Numpy array
-array=df[['latitude','longitude','altitude','timedelta']].values
-#array=array_n["latitude"]#,"longitude","altitude","timedelta"]]
+array=df[['flight_id', 'timedelta', 'latitude','longitude','altitude']].values
+samples=[]
+timesteps=[]
+features= []
+MainList = []
+for i in range(len(array)):
+    MainList.append([array[i][0], array[i][1], array[i][2:5]])
+    
+for i in range(len(MainList)):
+    print(MainList[i])
+
+
 # Save the array to a NPZ file
-np.savez('Code(ours)/data.npz', array)
+np.savez('Code(ours)/data.npz', MainList)
 
 
 
