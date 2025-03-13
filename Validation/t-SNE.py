@@ -4,76 +4,104 @@ from openTSNE import TSNE
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
 from sklearn.manifold import trustworthiness
+from sklearn.cluster import KMeans
 
 # File path
 file_path = 'Validation/EHAM_LIMC.csv'  # Replace with your actual file path
+features = ['latitude', 'longitude', 'altitude', 'timedelta']
+target_n_trajectories = 650  # Target number of trajectories
+perplexity = 15  # Single perplexity value, adjustable by you
 
-# Features for t-SNE
-features = ['latitude', 'longitude', 'altitude']
-
-# Process the CSV in chunks and collect the first 650 trajectories
-chunk_size = 1_000_000  # Adjust based on your RAM
-target_n_trajectories = 650
+# Step 1: Collect all points for the first 650 trajectories
+chunk_size = 1_000_000
 unique_flight_ids = set()
-trajectory_summaries = []
+trajectory_points = []
 
 for chunk in pd.read_csv(file_path, chunksize=chunk_size):
-    # Get unique flight_ids in this chunk
     chunk_flight_ids = chunk['flight_id'].unique()
-    
-    # Add new flight_ids until we reach 650
     for flight_id in chunk_flight_ids:
-        if flight_id not in unique_flight_ids and len(unique_flight_ids) < target_n_trajectories:
+        if len(unique_flight_ids) < target_n_trajectories:
             unique_flight_ids.add(flight_id)
-    
-    # Stop if we've collected 650 flight_ids
-    if len(unique_flight_ids) >= target_n_trajectories:
-        # Filter chunk to only include the first 650 flight_ids
-        filtered_chunk = chunk[chunk['flight_id'].isin(unique_flight_ids)]
-        summary = filtered_chunk.groupby('flight_id')[features].mean()
-        trajectory_summaries.append(summary)
-        break  # Exit after this chunk
-    
-    # Summarize this chunk for flight_ids we’re tracking
     filtered_chunk = chunk[chunk['flight_id'].isin(unique_flight_ids)]
     if not filtered_chunk.empty:
-        summary = filtered_chunk.groupby('flight_id')[features].mean()
-        trajectory_summaries.append(summary)
+        trajectory_points.append(filtered_chunk[['flight_id'] + features])
+    if len(unique_flight_ids) >= target_n_trajectories:
+        break
 
-# Combine summaries and ensure exactly 650 trajectories
-trajectory_data = pd.concat(trajectory_summaries).groupby('flight_id').mean().values
-if trajectory_data.shape[0] > target_n_trajectories:
-    trajectory_data = trajectory_data[:target_n_trajectories]  # Trim to exactly 650
+# Combine into a single DataFrame
+df_trajectories = pd.concat(trajectory_points)
+print(f"Processed {df_trajectories.shape[0]} points from {len(unique_flight_ids)} trajectories")
 
-print(f"Processed {trajectory_data.shape[0]} trajectories with {trajectory_data.shape[1]} features")
+# Step 2: Summarize each trajectory into a single point
+df_trajectories = df_trajectories.sort_values(['flight_id', 'timedelta'])
 
-# Normalize the data
+# Compute statistical summaries for each trajectory
+summaries = []
+flight_ids_ordered = []  # Collect flight_ids in order
+
+for flight_id, group in df_trajectories.groupby('flight_id'):
+    flight_ids_ordered.append(flight_id)  # Add flight_id to ordered list
+    summary = {}
+    for feature in features:
+        summary[f"{feature}_mean"] = group[feature].mean()
+        summary[f"{feature}_std"] = group[feature].std()
+        summary[f"{feature}_min"] = group[feature].min()
+        summary[f"{feature}_max"] = group[feature].max()
+    summaries.append(summary)
+
+# Convert summaries to a DataFrame
+summary_df = pd.DataFrame(summaries)
+summary_df['flight_id'] = flight_ids_ordered  # Assign ordered flight_ids
+
+# Features for t-SNE
+feature_columns = [col for col in summary_df.columns if col != 'flight_id']
+trajectory_summary = summary_df[feature_columns].fillna(0).values
+flight_ids_summary = summary_df['flight_id'].astype('category').cat.codes
+print(f"Using {trajectory_summary.shape[0]} summarized points for t-SNE")
+
+# Step 3: Normalize
 scaler = StandardScaler()
-trajectory_data = scaler.fit_transform(trajectory_data)
+trajectory_summary = scaler.fit_transform(trajectory_summary)
 
-# Apply t-SNE
+# Step 4: Apply t-SNE
 tsne = TSNE(
     n_components=2,
-    perplexity=10,        # Suitable for 650 points; adjust if needed (e.g., 5-50)
-    learning_rate="auto",
+    perplexity=perplexity,
+    learning_rate=200,
+    n_iter=1000,
     n_jobs=-1,
     verbose=1
 )
-embedding = tsne.fit(trajectory_data)
+embedding = tsne.fit(trajectory_summary)
 embedding_array = np.array(embedding)
 
-# Color by flight index (0 to 649)
-colors = np.arange(650)
+# Step 5: Visualize
+plt.figure(figsize=(12, 5))
 
-# Plot
-plt.figure(figsize=(10, 8))
-scatter = plt.scatter(embedding_array[:, 0], embedding_array[:, 1], c=colors, s=50, cmap='tab20')
-plt.colorbar(scatter, label='Trajectory Index')
-plt.title("t-SNE Embedding of First 650 Flight Trajectories")
+# Plot 1: Colored by Flight ID
+plt.subplot(1, 2, 1)
+scatter = plt.scatter(embedding_array[:, 0], embedding_array[:, 1], 
+                      c=flight_ids_summary, s=50, cmap='tab20', alpha=0.7)
+plt.colorbar(scatter, label='Flight ID (Coded)')
+plt.title(f"t-SNE of {trajectory_summary.shape[0]} Trajectories (Perplexity = {perplexity})")
 plt.xlabel("t-SNE Dimension 1")
 plt.ylabel("t-SNE Dimension 2")
+
+# Plot 2: Colored by KMeans Clusters
+kmeans = KMeans(n_clusters=5, random_state=42)
+kmeans_clusters = kmeans.fit_predict(embedding_array)
+
+plt.subplot(1, 2, 2)
+scatter = plt.scatter(embedding_array[:, 0], embedding_array[:, 1], 
+                      c=kmeans_clusters, s=50, cmap='tab10', alpha=0.7)
+plt.colorbar(scatter, label='KMeans Cluster')
+plt.title(f"KMeans Clusters (Perplexity = {perplexity})")
+plt.xlabel("t-SNE Dimension 1")
+plt.ylabel("t-SNE Dimension 2")
+
+plt.tight_layout()
 plt.show()
 
-# Compute trustworthiness
-trust_score = trustworthiness(trajectory_data, embedding_array, n_neighbors=5)
+# Step 6: Validation
+trust_score = trustworthiness(trajectory_summary, embedding_array, n_neighbors=5)
 print(f"Trustworthiness score: {trust_score:.4f}")
