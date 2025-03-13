@@ -3,18 +3,30 @@ import numpy as np
 # Load the CSV file into a Pandas DataFrame
 df = pd.read_csv('Code(ours)/traj.csv')
 # Convert the DataFrame to a Numpy array
-n_features=df[['timedelta', ['latitude','longitude','altitude'], ]].values
-n_timesteps=df['timedelta'].values
-n_samples=df[['flight_id']].values
+array=df[['flight_id', 'timedelta', 'latitude','longitude','altitude']].values
+samples=[]
+timesteps=[]
+features= []
+for i in range(len(array)):
+    samples.append(array[i][0])
+    timesteps.append(array[i][1])
+    features.append(array[i][2:5])
+    MainList=
+    
+samples=np.array(samples)
+timesteps=np.array(timesteps)
+features=np.array(features)
+MainList=[samples, timesteps, features]
+
+
+print(MainList)
 
 # Save the array to a NPZ file
-np.savez('Code(ours)/n_timesteps.npz', n_timesteps)
-np.savez('Code(ours)/n_features.npz', n_features)
-np.savez('Code(ours)/n_samples.npz', n_samples)
+np.savez('Code(ours)/data.npz',)
 
 
 
-data=np.load('Code(ours)/n_features.npz', allow_pickle=True)
+data=np.load('Code(ours)/data.npz', allow_pickle=True)
 lst=data.files
 for item in lst:
     print(item)
