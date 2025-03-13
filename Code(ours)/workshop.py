@@ -22,7 +22,7 @@ MainList=[samples, timesteps, features]
 print(MainList)
 
 # Save the array to a NPZ file
-np.savez('Code(ours)/data.npz',)
+np.savez('Code(ours)/data.npz', array)
 
 
 
