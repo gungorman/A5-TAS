@@ -11,7 +11,7 @@ for i in range(len(array)):
     samples.append(array[i][0])
     timesteps.append(array[i][1])
     features.append(array[i][2:5])
-    MainList=
+    
     
 samples=np.array(samples)
 timesteps=np.array(timesteps)
