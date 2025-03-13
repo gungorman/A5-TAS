@@ -1,4 +1,15 @@
+import pandas as pd
+import numpy as np
+# Load the CSV file into a Pandas DataFrame
+df = pd.read_csv('traj.csv', delimiter=',')
+# Convert the DataFrame to a Numpy array
+array = df.values
+# Save the array to a NPZ file
+np.savez('data.npz', array)
 
+
+
+"""
 #loading data:
 import pandas as pd
 data = pd.read_csv('filename.csv')
@@ -15,4 +26,4 @@ while i<n:
         print(f"new flight path found: {number} ")
     i+=1
 
-print("finished running")
+print("finished running")"""
