@@ -9,8 +9,8 @@ from sklearn.cluster import KMeans
 # File path
 file_path = 'Validation/EHAM_LIMC.csv'  # Replace with your actual file path
 features = ['latitude', 'longitude', 'altitude', 'timedelta']
-target_n_trajectories = 650  # Target number of trajectories
-perplexity = 15  # Single perplexity value, adjustable by you
+target_n_trajectories = 1500  # Target number of trajectories
+perplexity = 10  # Single perplexity value, adjustable by you
 
 # Step 1: Collect all points for the first 650 trajectories
 chunk_size = 1_000_000
@@ -81,19 +81,19 @@ plt.figure(figsize=(12, 5))
 # Plot 1: Colored by Flight ID
 plt.subplot(1, 2, 1)
 scatter = plt.scatter(embedding_array[:, 0], embedding_array[:, 1], 
-                      c=flight_ids_summary, s=50, cmap='tab20', alpha=0.7)
+                      c=flight_ids_summary, s=10, cmap='tab20', alpha=0.7)
 plt.colorbar(scatter, label='Flight ID (Coded)')
 plt.title(f"t-SNE of {trajectory_summary.shape[0]} Trajectories (Perplexity = {perplexity})")
 plt.xlabel("t-SNE Dimension 1")
 plt.ylabel("t-SNE Dimension 2")
 
 # Plot 2: Colored by KMeans Clusters
-kmeans = KMeans(n_clusters=5, random_state=42)
+kmeans = KMeans(n_clusters=4, random_state=42)
 kmeans_clusters = kmeans.fit_predict(embedding_array)
 
 plt.subplot(1, 2, 2)
 scatter = plt.scatter(embedding_array[:, 0], embedding_array[:, 1], 
-                      c=kmeans_clusters, s=50, cmap='tab10', alpha=0.7)
+                      c=kmeans_clusters, s=10, cmap='tab10', alpha=0.7)
 plt.colorbar(scatter, label='KMeans Cluster')
 plt.title(f"KMeans Clusters (Perplexity = {perplexity})")
 plt.xlabel("t-SNE Dimension 1")
