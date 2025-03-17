@@ -16,7 +16,7 @@ for i in range(len(MainList)):
 
 
 # Save the array to a NPZ file
-np.savez('Code(ours)/data.npz', MainList)
+np.savez('Code(ours)/data.npz', array)
 
 
 
