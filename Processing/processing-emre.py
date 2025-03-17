@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 
+
 def load_data(files):
 
 
@@ -29,9 +30,8 @@ def number_of_flights(files):
 # Get the number of unique flight IDs
     num_unique_flight_ids = len(unique_flight_ids)
 
-    #print(num_unique_flight_ids)
+    return unique_flight_ids
 
-number_of_flights(r"C:\Users\gungo\Downloads\ESSA_LFPG.csv")
 def group_by_flight(files):
 # Assuming 'files' is the path to your CSV file
     data = pd.read_csv(files)
@@ -116,6 +116,16 @@ def array_split(output_array):
     print(f"Test array shape: {test_array.shape}")
     print(f"Validation array shape: {val_array.shape}")
 
-output = numpy_array(r"C:\Users\gungo\Downloads\ESSA_LFPG.csv")
+
+output = numpy_array(r"Code(ours)\LOWW_EGLL - Copy.csv")
 array_split(output)
 print(output.shape)
+
+last_flight_id = output[-1,-1,-1]
+
+print(f"Last flight_id: {int(last_flight_id)}")
+
+
+
+print(number_of_flights(r"Code(ours)\LOWW_EGLL - Copy.csv"))
+print(output)
