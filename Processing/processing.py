@@ -22,19 +22,23 @@ def load_data(files):
     
 
 #EHAM_LIMC
-print(load_data(r"C:\Users\gungo\Downloads\ESSA_LFPG.csv"))
+#print(load_data(r"C:\Users\gungo\Downloads\ESSA_LFPG.csv"))
 
 
 def convert_timestamp(files):
-    import datetime
+    from datetime import datetime
     import pandas as pd
-    import numpy as np
-
+    
+    #Accessing data
     data = pd.read_csv(files)
     ts = data["timestamp"].to_numpy()
-
     timestamp = ts[0]
     
-    return timestamp.strftime("%Y%m%d%H%M%S%f")
+    #converting timestamp to number
+    time = datetime.fromisoformat(timestamp)
+    stamp = time.timestamp()
+
+
+    return stamp
 
 print(convert_timestamp(r"C:\Users\gungo\Downloads\ESSA_LFPG.csv"))
