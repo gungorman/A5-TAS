@@ -46,43 +46,48 @@ def group_by_flight(files):
     # You can perform further operations on each group here
 
 def numpy_array(files):
-
-# Assuming 'files' is the path to your CSV file
+    # Assuming 'files' is the path to your CSV file
     data = pd.read_csv(files)
 
-# Group the data by 'flight_id'
+    # Group the data by 'flight_id'
     grouped_data = data.groupby('flight_id')
 
-# Determine the number of unique flight IDs
+    # Sort the grouped data by the numeric part of the flight_id
+    grouped_data = sorted(grouped_data, key=lambda x: int(x[0].split('_')[-1]))
+
+    # Determine the number of unique flight IDs
     num_flight_ids = len(grouped_data)
 
-# Determine the maximum number of timesteps (rows) for any flight
-    max_timesteps = max(len(group) for _, group in grouped_data)
+    # Determine the number of timesteps (rows) for each flight
+    # Assuming the number of timesteps is constant and the same for all flights
+    timesteps = len(grouped_data[0][1])  # Number of rows in the first group
 
-# Number of features (latitude, longitude, altitude, timedelta, flight_id)
+    # Number of features (latitude, longitude, altitude, timedelta, flight_id)
     num_features = 5
 
-# Initialize an empty NumPy array with the desired shape
-    output_array = np.zeros((num_flight_ids, max_timesteps, num_features))
+    # Initialize an empty NumPy array with the desired shape
+    output_array = np.zeros((num_flight_ids, timesteps, num_features))
 
-# Fill the array with data #enumarate
+    # Fill the array with data
     for i, (flight_id, group) in enumerate(grouped_data):
-    # Extract the numeric part of the flight_id (e.g., TRAJ_0 --> 0)
+        # Extract the numeric part of the flight_id (e.g., TRAJ_0 --> 0)
         flight_id_numeric = int(flight_id.split('_')[-1])  # Split on '_' and take the last part
-    
-    # Extract the relevant columns
+
+        # Extract the relevant columns
         group_data = group[['latitude', 'longitude', 'altitude', 'timedelta']].to_numpy()
-    
-    # Add flight_id as an additional feature (repeated for each timestep)
+
+        # Add flight_id as an additional feature (repeated for each timestep)
         flight_id_column = np.full((len(group), 1), flight_id_numeric)
         group_data_with_id = np.hstack((group_data, flight_id_column))
-    
-    # Fill the output array
+
+        # Fill the output array
         output_array[i, :len(group), :] = group_data_with_id
 
-# Output the resulting NumPy array
-    
-    return(output_array)
+        #print(f"Flight ID: {flight_id}, Numeric Flight ID: {flight_id_numeric}")
+        #print(f"Index: {i}")
+
+    # Output the resulting NumPy array
+    return output_array
 
 
 # (5108,7468,4)
@@ -145,12 +150,12 @@ def save_arrays_to_npz(train_array, test_array, val_array, train_file, test_file
 #save_arrays_to_npz(train_array, test_array, val_array, "train_data.npz", "test_data.npz", "val_data.npz")
 
 
-output = numpy_array(r"Code(ours)\LOWW_EGLL - Copy.csv")
+output = numpy_array(r"C:\Users\gungo\Downloads\ESSA_LFPG.csv")
 #array_split(output)
-#print(output.shape)
+print(output.shape)
 
-#last_flight_id = output[-1,-1,-1]
+last_flight_id = output[-1,-1,-1]
 
-#print(f"Last flight_id: {int(last_flight_id)}")
+print(f"Last flight_id: {int(last_flight_id)}")
 #print(number_of_flights(r"Code(ours)\LOWW_EGLL - Copy.csv"))
-#print(output)
+print(output)
