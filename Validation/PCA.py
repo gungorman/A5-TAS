@@ -33,6 +33,8 @@ trajectory_summary = scaler.fit_transform(trajectory_summary)
 pca = PCA(n_components=2)
 embedding_array = pca.fit_transform(trajectory_summary)
 explained_variance_ratio = pca.explained_variance_ratio_
+explained_variance_ratio = explained_variance_ratio ** 2
+explained_variance_ratio /= explained_variance_ratio.sum()
 print(f"Explained variance ratio: {explained_variance_ratio[0]:.4f} (PC1), {explained_variance_ratio[1]:.4f} (PC2)")
 
 # Step 4: Clustering
