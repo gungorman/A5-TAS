@@ -90,39 +90,44 @@ def numpy_array(files):
     return output_array
 
 
-# (5108,7468,4)
-
 def array_split(output_array):
+    """
+    Split the output_array into train, test, and validation arrays, excluding the flight_id column.
 
-# Assuming output_array is already created as in your code
-# output_array has shape (num_flight_ids, max_timesteps, num_features)
+    Parameters:
+        output_array (np.ndarray): The input array to split, with shape (num_flight_ids, max_timesteps, num_features).
 
-# Step 1: Randomly shuffle the indices of flight_ids
+    Returns:
+        train_array (np.ndarray): Training data (80% of flights) with shape (num_train_flights, max_timesteps, num_features - 1).
+        test_array (np.ndarray): Testing data (10% of flights) with shape (num_test_flights, max_timesteps, num_features - 1).
+        val_array (np.ndarray): Validation data (10% of flights) with shape (num_val_flights, max_timesteps, num_features - 1).
+    """
+    # Step 1: Randomly shuffle the indices of flight_ids
     indices = np.arange(output_array.shape[0])  # Create an array of indices [0, 1, 2, ..., num_flight_ids - 1]
     np.random.shuffle(indices)  # Shuffle the indices
 
-# Step 2: Calculate the sizes for train, test, and validation sets
+    # Step 2: Calculate the sizes for train, test, and validation sets
     num_flight_ids = output_array.shape[0]
     train_size = int(0.8 * num_flight_ids)
     test_size = int(0.1 * num_flight_ids)
     val_size = num_flight_ids - train_size - test_size  # Remaining for validation
 
-# Step 3: Split the shuffled indices into train, test, and validation sets
+    # Step 3: Split the shuffled indices into train, test, and validation sets
     train_indices = indices[:train_size]
     test_indices = indices[train_size:train_size + test_size]
     val_indices = indices[train_size + test_size:]
 
-# Step 4: Use the indices to slice the output_array
-    train_array = output_array[train_indices]
-    test_array = output_array[test_indices]
-    val_array = output_array[val_indices]
+    # Step 4: Use the indices to slice the output_array, excluding the flight_id column (last column)
+    train_array = output_array[train_indices, :, :-1]  # Exclude the last column (flight_id)
+    test_array = output_array[test_indices, :, :-1]    # Exclude the last column (flight_id)
+    val_array = output_array[val_indices, :, :-1]      # Exclude the last column (flight_id)
 
-# Output the shapes of the resulting arrays
+    # Output the shapes of the resulting arrays
     print(f"Train array shape: {train_array.shape}")
     print(f"Test array shape: {test_array.shape}")
     print(f"Validation array shape: {val_array.shape}")
 
-    return train_array, test_array , val_array
+    return train_array, test_array, val_array
 
 
 def save_arrays_to_npz(train_array, test_array, val_array, train_file, test_file, val_file):
