@@ -17,12 +17,12 @@ def load_data(files):
     f = data['flight_id'].to_numpy()
     ts = data["timestamp"].to_numpy()
 
-    #return f'Latitude: {x}', f'Longitude: {y}', f'altitude: {z}', f'timedelta: {t}', f'flight_id: {f}'
-    return ts
+    return f'Latitude: {x}', f'Longitude: {y}', f'altitude: {z}', f'timedelta: {t}', f'flight_id: {f}', f'timestamp : {ts}'
+    
     
 
 #EHAM_LIMC
-#print(load_data(r"C:\Users\gungo\Downloads\ESSA_LFPG.csv"))
+#print(load_data(r"C:\Users\chris\OneDrive\Documenten\Chris\Q3 2024-2025\Project\EHAM_LIMC.csv"))
 
 
 def convert_timestamp(files):
@@ -41,4 +41,4 @@ def convert_timestamp(files):
 
     return stamp
 
-print(convert_timestamp(r"C:\Users\gungo\Downloads\ESSA_LFPG.csv"))
+print(convert_timestamp(r"C:\Users\chris\OneDrive\Documenten\Chris\Q3 2024-2025\Project\EHAM_LIMC.csv"))
