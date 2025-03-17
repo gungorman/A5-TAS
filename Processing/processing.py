@@ -24,15 +24,17 @@ def load_data(files):
 #EHAM_LIMC
 print(load_data(r"C:\Users\gungo\Downloads\ESSA_LFPG.csv"))
 
-"""
-def convert_timestamp(files):
 
+def convert_timestamp(files):
+    import datetime
     import pandas as pd
     import numpy as np
 
     data = pd.read_csv(files)
     ts = data["timestamp"].to_numpy()
 
-    timestamp = 
-"""
+    timestamp = ts[0]
+    
+    return timestamp.strftime("%Y%m%d%H%M%S%f")
 
+print(convert_timestamp(r"C:\Users\gungo\Downloads\ESSA_LFPG.csv"))
