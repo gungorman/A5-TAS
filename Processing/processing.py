@@ -22,7 +22,7 @@ def load_data(files):
     
 
 #EHAM_LIMC
-print(load_data(r"C:\Users\chris\OneDrive\Documenten\Chris\Q3 2024-2025\Project\EHAM_LIMC.csv"))
+print(load_data(r"C:\Users\gungo\Downloads\ESSA_LFPG.csv"))
 
 """
 def convert_timestamp(files):
@@ -35,3 +35,4 @@ def convert_timestamp(files):
 
     timestamp = 
 """
+
