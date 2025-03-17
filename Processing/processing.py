@@ -24,7 +24,7 @@ def load_data(files):
 #EHAM_LIMC
 #print(load_data(r"C:\Users\chris\OneDrive\Documenten\Chris\Q3 2024-2025\Project\EHAM_LIMC.csv"))
 
-
+"""
 def convert_timestamp(files):
     from datetime import datetime
     import pandas as pd
@@ -32,6 +32,8 @@ def convert_timestamp(files):
     #Accessing data
     data = pd.read_csv(files)
     ts = data["timestamp"].to_numpy()
+
+
     timestamp = ts[0]
     
     #converting timestamp to number
@@ -40,5 +42,26 @@ def convert_timestamp(files):
 
 
     return stamp
+"""
+
+def convert_timestamp(files):
+    from datetime import datetime
+    import pandas as pd
+    
+    #Accessing data
+    data = pd.read_csv(files)
+    ts = data["timestamp"].to_numpy()
+
+
+    stamp_list = []    
+    for i in ts[:10]:
+        time = datetime.fromisoformat(i)
+        stamp = time.timestamp()
+        stamp_list.append(stamp)
+
+    #converting timestamp to number
+    
+
+    return stamp_list
 
 print(convert_timestamp(r"C:\Users\chris\OneDrive\Documenten\Chris\Q3 2024-2025\Project\EHAM_LIMC.csv"))
