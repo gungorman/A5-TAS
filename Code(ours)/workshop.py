@@ -4,21 +4,24 @@ from datetime import datetime
 
 # Load the CSV file into a Pandas DataFrame
 df = pd.read_csv('Code(ours)/LOWW_EGLL - Copy.csv')
+#unique_flight_ids = df['flight_id'].unique()
+#print(unique_flight_ids)
 # Convert the DataFrame to a Numpy array
 array=df[['flight_id', 'timestamp', 'altitude']].values # 'latitude','longitude','altitude']].values
-
-
-array[1] = datetime.strptime(array[1], '%Y-%d-%m %H:%M:%S')
 MainList = []
 for i in range(len(array)):
     MainList.append([array[i][0], array[i][1], array[i][2]])
     
-
-
+#int(round(array[i][1].timestamp()))
+for i in range(len(array)):
+    array[i][1]=int(round(datetime.fromisoformat(array[i][1]).timestamp()))
+#datetime.strptime(array[i][1], '%Y-%m-%d %H:%M:%S')
 # Save the array to a NPZ file
 np.savez('Code(ours)/data.npz', array)
-
-
+flight_id='TRAJ_1001'
+flight_id_numeric = int(flight_id.split('_')[-1])
+print(flight_id_numeric)
+print(array.shape)
 
 data=np.load('Code(ours)/data.npz', allow_pickle=True)
 lst=data.files
