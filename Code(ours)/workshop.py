@@ -1,18 +1,18 @@
 import pandas as pd
 import numpy as np
+from datetime import datetime
+
 # Load the CSV file into a Pandas DataFrame
-df = pd.read_csv('Code(ours)/traj.csv')
+df = pd.read_csv('Code(ours)/LOWW_EGLL - Copy.csv')
 # Convert the DataFrame to a Numpy array
-array=df[['flight_id', 'timedelta', 'latitude','longitude','altitude']].values
-samples=[]
-timesteps=[]
-features= []
+array=df[['flight_id', 'timestamp', 'altitude']].values # 'latitude','longitude','altitude']].values
+
+
+array[1] = datetime.strptime(array[1], '%Y-%d-%m %H:%M:%S')
 MainList = []
 for i in range(len(array)):
-    MainList.append([array[i][0], array[i][1], array[i][2:5]])
+    MainList.append([array[i][0], array[i][1], array[i][2]])
     
-for i in range(len(MainList)):
-    print(MainList[i])
 
 
 # Save the array to a NPZ file
