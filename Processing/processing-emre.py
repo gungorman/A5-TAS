@@ -117,6 +117,33 @@ def array_split(output_array):
     print(f"Test array shape: {test_array.shape}")
     print(f"Validation array shape: {val_array.shape}")
 
+import numpy as np
+
+def save_arrays_to_npz(train_array, test_array, val_array, train_file, test_file, val_file):
+    """
+    Save train, test, and validation arrays into separate .npz files.
+
+    Parameters:
+        train_array (np.ndarray): Training data array.
+        test_array (np.ndarray): Testing data array.
+        val_array (np.ndarray): Validation data array.
+        train_file (str): Name of the .npz file for training data (e.g., 'train_data.npz').
+        test_file (str): Name of the .npz file for testing data (e.g., 'test_data.npz').
+        val_file (str): Name of the .npz file for validation data (e.g., 'val_data.npz').
+    """
+    # Save each array to a separate .npz file
+    np.savez(train_file, train=train_array)
+    np.savez(test_file, test=test_array)
+    np.savez(val_file, val=val_array)
+
+    print(f"Training data saved to {train_file}")
+    print(f"Testing data saved to {test_file}")
+    print(f"Validation data saved to {val_file}")
+
+# Example usage
+# Assuming train_array, test_array, and val_array are already created
+#save_arrays_to_npz(train_array, test_array, val_array, "train_data.npz", "test_data.npz", "val_data.npz")
+
 
 output = numpy_array(r"Code(ours)\LOWW_EGLL - Copy.csv")
 #array_split(output)
@@ -125,8 +152,5 @@ output = numpy_array(r"Code(ours)\LOWW_EGLL - Copy.csv")
 #last_flight_id = output[-1,-1,-1]
 
 #print(f"Last flight_id: {int(last_flight_id)}")
-
-
-
 #print(number_of_flights(r"Code(ours)\LOWW_EGLL - Copy.csv"))
 #print(output)
