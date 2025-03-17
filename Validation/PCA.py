@@ -39,7 +39,8 @@ print(f"Explained variance ratio: {explained_variance_ratio[0]:.4f} (PC1), {expl
 
 # Step 4: Clustering
 kmeans = KMeans(n_clusters=n_clusters, random_state=42)
-clusters = kmeans.fit_predict(embedding_array)
+clusters = kmeans.fit_predict(trajectory_summary)  # Use the full feature set instead of PCA output
+
 
 # Step 5: Visualize
 plt.figure(figsize=(6, 5))
