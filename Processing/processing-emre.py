@@ -65,7 +65,7 @@ def numpy_array(files):
 # Initialize an empty NumPy array with the desired shape
     output_array = np.zeros((num_flight_ids, max_timesteps, num_features))
 
-# Fill the array with data
+# Fill the array with data #enumarate
     for i, (flight_id, group) in enumerate(grouped_data):
     # Extract the numeric part of the flight_id (e.g., TRAJ_0 --> 0)
         flight_id_numeric = int(flight_id.split('_')[-1])  # Split on '_' and take the last part
@@ -81,6 +81,7 @@ def numpy_array(files):
         output_array[i, :len(group), :] = group_data_with_id
 
 # Output the resulting NumPy array
+    
     return(output_array)
 
 
@@ -118,14 +119,14 @@ def array_split(output_array):
 
 
 output = numpy_array(r"Code(ours)\LOWW_EGLL - Copy.csv")
-array_split(output)
-print(output.shape)
+#array_split(output)
+#print(output.shape)
 
-last_flight_id = output[-1,-1,-1]
+#last_flight_id = output[-1,-1,-1]
 
-print(f"Last flight_id: {int(last_flight_id)}")
+#print(f"Last flight_id: {int(last_flight_id)}")
 
 
 
-print(number_of_flights(r"Code(ours)\LOWW_EGLL - Copy.csv"))
-print(output)
+#print(number_of_flights(r"Code(ours)\LOWW_EGLL - Copy.csv"))
+#print(output)
