@@ -42,3 +42,4 @@ def convert_timestamp(files):
     return stamp
 
 print(convert_timestamp(r"C:\Users\chris\OneDrive\Documenten\Chris\Q3 2024-2025\Project\EHAM_LIMC.csv"))
+print(convert_timestamp(r"C:\Users\Gebruiker\Downloads\ESSA_LFPG.csv"))
