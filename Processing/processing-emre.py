@@ -143,7 +143,7 @@ def save_arrays_to_npz(train_array, test_array, val_array, train_file, test_file
         val_file (str): Full path for the validation data file (e.g., 'data/val_data.npz').
     """
     # Save each array to a separate .npz file
-    np.savez(train_file, train=train_array)
+    np.savez(train_file, data=train_array)
     np.savez(test_file, test=test_array)
     np.savez(val_file, val=val_array)
 
