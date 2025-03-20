@@ -27,6 +27,11 @@ def compute_speed_magnitude(data):
     speed = np.linalg.norm(diff, axis=1)  # Compute Euclidean speed
     return speed
 
+
+# Simulate real and fake flight paths (latitude, longitude, altitude)
+#n_points = number of data points
+#add generated data as an array
+
 max_lag = 200
 
 # Compute ACD
