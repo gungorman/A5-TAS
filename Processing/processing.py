@@ -18,10 +18,7 @@ def load_data(files):
     ts = data["timestamp"].to_numpy()
 
     return f'Latitude: {x}', f'Longitude: {y}', f'altitude: {z}', f'timedelta: {t}', f'flight_id: {f}', f'timestamp : {ts}'
-    
-    
 
-#EHAM_LIMC
 #print(load_data(r"C:\Users\chris\OneDrive\Documenten\Chris\Q3 2024-2025\Project\EHAM_LIMC.csv"))
 
 
@@ -32,14 +29,15 @@ def convert_timestamp(files):
     #Accessing data
     data = pd.read_csv(files)
     ts = data["timestamp"].to_numpy()
-    timestamp = ts[0]
-    
-    #converting timestamp to number
-    time = datetime.fromisoformat(timestamp)
-    stamp = time.timestamp()
 
 
-    return stamp
+    stamp_list = []    
+    for i in ts[:10]:
+        time = datetime.fromisoformat(i)
+        stamp = time.timestamp()
+        stamp_list.append(stamp)
+  
+    return stamp_list
 
 print(convert_timestamp(r"C:\Users\chris\OneDrive\Documenten\Chris\Q3 2024-2025\Project\EHAM_LIMC.csv"))
 print(convert_timestamp(r"C:\Users\Gebruiker\Downloads\ESSA_LFPG.csv"))
