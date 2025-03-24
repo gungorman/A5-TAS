@@ -246,8 +246,8 @@ def save_arrays_to_npz(train_array, test_array, val_array, train_file, test_file
     print(f"Testing data saved to {test_file}")
     print(f"Validation data saved to {val_file}")
 
-'''
-sample_rate = 40
+
+sample_rate = 20
 
 ### ESSA_LFPG ###
 output_ESSA_LFPG = numpy_array_sampled(r"C:\Users\gungo\Downloads\ESSA_LFPG.csv", sample_rate)
@@ -286,6 +286,6 @@ EHAM_LIMC_train_file = f"{output_dir}/EHAM_LIMC_train_dataa_n={sample_rate}.npz"
 EHAM_LIMC_test_file = f"{output_dir}/EHAM_LIMC_test_dataa_n={sample_rate}.npz"
 EHAM_LIMC_val_file = f"{output_dir}/EHAM_LIMC_val_dataa_n={sample_rate}.npz"
 
-save_arrays_to_npz(EHAM_LIMC_train_array, EHAM_LIMC_test_array, EHAM_LIMC_val_array, EHAM_LIMC_train_file, EHAM_LIMC_test_file, EHAM_LIMC_val_file)'
-'''
+save_arrays_to_npz(EHAM_LIMC_train_array, EHAM_LIMC_test_array, EHAM_LIMC_val_array, EHAM_LIMC_train_file, EHAM_LIMC_test_file, EHAM_LIMC_val_file)
+
 
