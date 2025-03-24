@@ -108,7 +108,7 @@ def array_split(output_array):
 
     # Step 2: Calculate the sizes for train, test, and validation sets
     num_flight_ids = output_array.shape[0]
-    train_size = int(0.8 * num_flight_ids)
+    train_size = int(0.015 * num_flight_ids)
     test_size = int(0.1 * num_flight_ids)
     val_size = num_flight_ids - train_size - test_size  # Remaining for validation
 

@@ -5,10 +5,10 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.linalg import sqrtm
 
 ## Import the data and take just the first 4 columns, removes the title column
 data = np.genfromtxt('C:/Sofia/TU Delft/Bsc2/Proyect/second semester/EHAM_LIMC.csv', delimiter=',')
-
 def FID(real_data, synth_data):
     ## Clean the data to obtain an array with just the 4 relevant info
     real_data = np.delete(real_data, 0, 0)
@@ -27,20 +27,43 @@ def FID(real_data, synth_data):
             synth_index.append(i)
     flight_size = real_index[1] ## This assumes all trajectories have the same size, which they do in this experiment 
 
-    # Lists to store values of average and covariance
-    real_mean = [] ## List for storing av in real data features
-    real_cov = [] ## List for storing covariance of real data features
-    synth_mean = [] ## Same for synth
-    synth_mean = [] ## Same for synth
+    # Lists to store the FID scores
+    fid_scores = []
 
     # For each datapoint, obtain the mean a covariance for real and synth trajectories. Store the values in the lists
     for datapoint in range(flight_size):
         real_dtp = real_data[datapoint::flight_size]
         synth_dtp = synth_data[datapoint::flight_size]
-        real_means_dtp = []
-        covariance = []
-        for i in range(len(real_dtp[0])):
-            real_means_dtp = np.append(real_means_dtp, np.mean(real_dtp[:, i]))
-        real_mean = np.append(real_mean, real_means_dtp)
-    print(real_mean) ## To do, fix means to be in separate rows in the general array
-FID(data, data)
+    
+        fid_dtp = FID_dtp(real_dtp, synth_dtp)
+        fid_scores = np.append(fid_scores, fid_dtp)
+    return fid_scores
+
+def FID_dtp(real_dtp, synth_dtp):
+    real_means_dtp = []
+    synth_means_dtp = []
+
+    ## Calculate mean of all parameters
+    for i in range(len(real_dtp[0])):
+        real_means_dtp = np.append(real_means_dtp, np.mean(real_dtp[:, i]))
+        synth_means_dtp = np.append(synth_means_dtp, np.mean(synth_dtp[:, i]))
+
+    ## Calculate covariance
+    real_cov = np.cov(real_dtp, rowvar=False)
+    synth_cov = np.cov(synth_dtp, rowvar=False)
+
+    #Calculate FID
+    mean_diff = real_means_dtp - synth_means_dtp
+    cov_mean = sqrtm(np.dot(real_cov, synth_cov))
+    if np.iscomplexobj(cov_mean):
+        cov_mean = cov_mean.real
+    
+    fid_score = np.sum(mean_diff**2) + np.trace(real_cov + synth_cov - 2 * cov_mean)
+    if fid_score < 0:
+        pass
+
+    return fid_score
+
+fid = FID(data, data)
+plt.plot(range(len(fid)), fid)
+plt.show()
