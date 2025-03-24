@@ -90,6 +90,58 @@ def numpy_array(files):
     return output_array
 
 
+def numpy_array_sampled(files, n=1000):
+    """
+    Convert flight trajectory data from CSV to a NumPy array, sampling every nth timestep.
+    
+    Args:
+        files (str): Path to the CSV file
+        n (int): Sampling interval for timesteps (take every nth point)
+    
+    Returns:
+        np.ndarray: Array of shape (num_flights, sampled_timesteps, num_features)
+    """
+    # Read the CSV file
+    data = pd.read_csv(files)
+
+    # Group the data by 'flight_id'
+    grouped_data = data.groupby('flight_id')
+
+    # Sort the grouped data by the numeric part of the flight_id
+    grouped_data = sorted(grouped_data, key=lambda x: int(x[0].split('_')[-1]))
+
+    # Determine the number of unique flight IDs
+    num_flight_ids = len(grouped_data)
+
+    # Determine the original number of timesteps (rows) for each flight
+    original_timesteps = len(grouped_data[0][1])
+    
+    # Calculate the number of timesteps after sampling
+    sampled_timesteps = (original_timesteps + n - 1) // n  # Ceiling division
+
+    # Number of features (latitude, longitude, altitude, timedelta, flight_id)
+    num_features = 5
+
+    # Initialize an empty NumPy array with the desired shape
+    output_array = np.zeros((num_flight_ids, sampled_timesteps, num_features))
+
+    # Fill the array with sampled data
+    for i, (flight_id, group) in enumerate(grouped_data):
+        # Extract the numeric part of the flight_id
+        flight_id_numeric = int(flight_id.split('_')[-1])
+
+        # Extract the relevant columns and sample every nth row
+        group_data = group[['latitude', 'longitude', 'altitude', 'timedelta']].iloc[::n].to_numpy()
+
+        # Add flight_id as an additional feature (repeated for each sampled timestep)
+        flight_id_column = np.full((len(group_data), 1), flight_id_numeric)
+        group_data_with_id = np.hstack((group_data, flight_id_column))
+
+        # Fill the output array
+        output_array[i, :len(group_data), :] = group_data_with_id
+
+    return output_array
+
 def array_split(output_array):
     """
     Split the output_array into train, test, and validation arrays, excluding the flight_id column.
