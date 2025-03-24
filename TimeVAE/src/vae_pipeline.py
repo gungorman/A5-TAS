@@ -14,7 +14,7 @@ from data_utils import (
     save_data,
 )
 import paths
-from VAE.vae_utils import (
+from vae.vae_utils import (
     instantiate_vae_model,
     train_vae,
     save_vae_model,
@@ -133,7 +133,7 @@ def run_vae_pipeline(dataset_name: str, vae_type: str):
 
 if __name__ == "__main__":
     # check `/data/` for available datasets
-    dataset = "Code(ours)/data.npz"
+    dataset = "EHAM_LIMC_train_dataa_n=40"
 
     # models: vae_dense, vae_conv, timeVAE
     model_name = "timeVAE"
