@@ -13,9 +13,9 @@ file_paths = {
     'LOWW_EGLL': 'Validation/LOWW_EGLL.csv'
 }
 features = ['latitude', 'longitude', 'altitude', 'timedelta']
-target_n_trajectories_per_pair = 500
-perplexity = 30
-n_clusters = 6
+target_n_trajectories_per_pair = 100
+perplexity = 30  # Match plot's perplexity
+n_clusters = 3
 
 # Step 1: Collect unique trajectories from all files
 all_trajectories = []
@@ -37,7 +37,6 @@ summary_df.columns = feature_columns
 trajectory_summary = summary_df.values
 # Map flight_ids to airport pairs for coloring
 flight_to_pair = df_trajectories[['flight_id', 'airport_pair']].drop_duplicates().set_index('flight_id')['airport_pair']
-pair_codes = flight_to_pair.reindex(summary_df.index).astype('category').cat.codes
 print(f"Using {trajectory_summary.shape[0]} summarized points for t-SNE")
 
 # Step 3: Normalize and apply t-SNE
@@ -50,18 +49,31 @@ embedding_array = np.array(tsne.fit(trajectory_summary))
 kmeans = KMeans(n_clusters=n_clusters, random_state=42)
 clusters = kmeans.fit_predict(embedding_array)
 
-# Step 5: Visualize
+# Step 5: Visualize with explicit colors for airport pairs
 plt.figure(figsize=(12, 5))
-for i, (color_by, title, cmap) in enumerate([
-    (pair_codes, 'Airport Pair', 'tab10'),
-    (clusters, f'KMeans Clusters (n={n_clusters})', 'tab10')
-], 1):
-    plt.subplot(1, 2, i)
-    scatter = plt.scatter(embedding_array[:, 0], embedding_array[:, 1], c=color_by, s=10, cmap=cmap, alpha=0.7)
-    plt.colorbar(scatter, label=title)
-    plt.title(f"t-SNE (Perplexity = {perplexity})")
-    plt.xlabel("t-SNE Dim 1")
-    plt.ylabel("t-SNE Dim 2")
+
+# Left plot: Color by airport pair with distinct colors
+plt.subplot(1, 2, 1)
+colors = {'EHAM_LIMC': 'blue', 'ESSA_LFPG': 'green', 'LOWW_EGLL': 'red'}
+for pair in file_paths.keys():
+    mask = flight_to_pair.reindex(summary_df.index) == pair
+    if mask.sum() > 0:  # Ensure there are points to plot
+        plt.scatter(embedding_array[mask, 0], embedding_array[mask, 1], 
+                    c=colors[pair], s=10, alpha=0.7, label=pair)
+plt.legend()
+plt.title(f"t-SNE (Perplexity = {perplexity})")
+plt.xlabel("t-SNE Dim 1")
+plt.ylabel("t-SNE Dim 2")
+
+# Right plot: KMeans clusters
+plt.subplot(1, 2, 2)
+scatter = plt.scatter(embedding_array[:, 0], embedding_array[:, 1], 
+                      c=clusters, s=10, cmap='tab10', alpha=0.7)
+plt.colorbar(scatter, label=f'KMeans Clusters (n={n_clusters})')
+plt.title(f"t-SNE (Perplexity = {perplexity})")
+plt.xlabel("t-SNE Dim 1")
+plt.ylabel("t-SNE Dim 2")
+
 plt.tight_layout()
 plt.show()
 
