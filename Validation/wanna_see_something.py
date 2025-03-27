@@ -41,20 +41,19 @@ if not flight_data:
 # Number of flight paths to display
 n_paths = 5  # Change this value as needed
 
-# === OPTIONAL: PLOT 3D FLIGHT PATHS ===
+
 has_altitude = any(flight['altitude'] is not None for flight in flight_data)
 
 if has_altitude:
     fig = plt.figure(figsize=(10, 6))
     ax = fig.add_subplot(111, projection='3d')
 
-    # Create a colormap
-    colormap = cm.viridis  # You can choose other colormaps like 'plasma', 'inferno', etc.
-    colors = colormap(np.linspace(0, 1, n_paths))  # Generate `n_paths` distinct colors from the colormap
+    colormap = cm.viridis
+    colors = colormap(np.linspace(0, 1, n_paths))
 
-    for i, flight in enumerate(flight_data[:n_paths]):  # Only plot the first `n_paths` entries
+    for i, flight in enumerate(flight_data[:n_paths]):
         ax.plot(flight['longitude'].flatten(), flight['latitude'].flatten(), flight['altitude'].flatten(),
-                label=flight['filename'], color=colors[i])  # Assign a unique color to each flight path
+                label=flight['filename'], color=colors[i]) 
 
     ax.set_title('3D Flight Paths')
     ax.set_xlabel('Longitude')
