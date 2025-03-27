@@ -14,7 +14,7 @@ from data_utils import (
     save_data,
 )
 import paths
-from VAE.vae_utils import (
+from vae.vae_utils import (
     instantiate_vae_model,
     train_vae,
     save_vae_model,
@@ -24,6 +24,7 @@ from VAE.vae_utils import (
 )
 from visualize import plot_samples, plot_latent_space_samples, visualize_and_save_tsne
 
+nr_epochs=100
 
 def run_vae_pipeline(dataset_name: str, vae_type: str):
     # ----------------------------------------------------------------------------------
@@ -57,7 +58,7 @@ def run_vae_pipeline(dataset_name: str, vae_type: str):
     train_vae(
         vae=vae_model,
         train_data=scaled_train_data,
-        max_epochs=1000,
+        max_epochs=nr_epochs,
         verbose=1,
     )
 
@@ -133,7 +134,7 @@ def run_vae_pipeline(dataset_name: str, vae_type: str):
 
 if __name__ == "__main__":
     # check `/data/` for available datasets
-    dataset = "Code(ours)/data.npz"
+    dataset = "EHAM_LIMC_train_dataa_n=40"
 
     # models: vae_dense, vae_conv, timeVAE
     model_name = "timeVAE"

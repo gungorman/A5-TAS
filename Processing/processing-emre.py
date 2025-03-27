@@ -1,24 +1,6 @@
 import pandas as pd
 import numpy as np
 
-
-def load_data(files):
-
-
-    data = pd.read_csv(files)
-    #data.drop(columns=["callsign", "icao24", "cluster", "timestamp"], inplace=True)
-    x = data['latitude'].to_numpy()
-    y = data['longitude'].to_numpy()
-    z = data['altitude'].to_numpy()
-    t = data['timedelta'].to_numpy()
-    f = data['flight_id'].to_numpy()
-
-    # Combine the arrays into a single numpy array
-    #combined_array = np.column_stack((x, y, z, t))
-    #print(load_data(r"C:\Users\gungo\Downloads\ESSA_LFPG.csv"))
-    return combined_array
-
-
 def number_of_flights(files):
 
 # Assuming 'files' is the path to your CSV file
@@ -90,6 +72,58 @@ def numpy_array(files):
     return output_array
 
 
+def numpy_array_sampled(files, n):
+    """
+    Convert flight trajectory data from CSV to a NumPy array, sampling every nth timestep.
+    
+    Args:
+        files (str): Path to the CSV file
+        n (int): Sampling interval for timesteps (take every nth point)
+    
+    Returns:
+        np.ndarray: Array of shape (num_flights, sampled_timesteps, num_features)
+    """
+    # Read the CSV file
+    data = pd.read_csv(files)
+
+    # Group the data by 'flight_id'
+    grouped_data = data.groupby('flight_id')
+
+    # Sort the grouped data by the numeric part of the flight_id
+    grouped_data = sorted(grouped_data, key=lambda x: int(x[0].split('_')[-1]))
+
+    # Determine the number of unique flight IDs
+    num_flight_ids = len(grouped_data)
+
+    # Determine the original number of timesteps (rows) for each flight
+    original_timesteps = len(grouped_data[0][1])
+    
+    # Calculate the number of timesteps after sampling
+    sampled_timesteps = (original_timesteps + n - 1) // n  # Ceiling division
+
+    # Number of features (latitude, longitude, altitude, timedelta, flight_id)
+    num_features = 5
+
+    # Initialize an empty NumPy array with the desired shape
+    output_array = np.zeros((num_flight_ids, sampled_timesteps, num_features))
+
+    # Fill the array with sampled data
+    for i, (flight_id, group) in enumerate(grouped_data):
+        # Extract the numeric part of the flight_id
+        flight_id_numeric = int(flight_id.split('_')[-1])
+
+        # Extract the relevant columns and sample every nth row
+        group_data = group[['latitude', 'longitude', 'altitude', 'timedelta']].iloc[::n].to_numpy()
+
+        # Add flight_id as an additional feature (repeated for each sampled timestep)
+        flight_id_column = np.full((len(group_data), 1), flight_id_numeric)
+        group_data_with_id = np.hstack((group_data, flight_id_column))
+
+        # Fill the output array
+        output_array[i, :len(group_data), :] = group_data_with_id
+
+    return output_array
+
 def array_split(output_array):
     """
     Split the output_array into train, test, and validation arrays, excluding the flight_id column.
@@ -108,7 +142,7 @@ def array_split(output_array):
 
     # Step 2: Calculate the sizes for train, test, and validation sets
     num_flight_ids = output_array.shape[0]
-    train_size = int(0.015 * num_flight_ids)
+    train_size = int(0.8 * num_flight_ids)
     test_size = int(0.1 * num_flight_ids)
     val_size = num_flight_ids - train_size - test_size  # Remaining for validation
 
@@ -129,6 +163,49 @@ def array_split(output_array):
 
     return train_array, test_array, val_array
 
+def array_split_seed(output_array, random_seed=1):
+    """
+    Split the output_array into train, test, and validation arrays, excluding the flight_id column.
+
+    Parameters:
+        output_array (np.ndarray): The input array to split, with shape (num_flight_ids, max_timesteps, num_features).
+        random_seed (int, optional): Seed for the random number generator to ensure reproducibility. Defaults to None.
+
+    Returns:
+        train_array (np.ndarray): Training data (80% of flights) with shape (num_train_flights, max_timesteps, num_features - 1).
+        test_array (np.ndarray): Testing data (10% of flights) with shape (num_test_flights, max_timesteps, num_features - 1).
+        val_array (np.ndarray): Validation data (10% of flights) with shape (num_val_flights, max_timesteps, num_features - 1).
+    """
+    # Set the random seed if provided
+    if random_seed is not None:
+        np.random.seed(random_seed)
+
+    # Step 1: Randomly shuffle the indices of flight_ids
+    indices = np.arange(output_array.shape[0])  # Create an array of indices [0, 1, 2, ..., num_flight_ids - 1]
+    np.random.shuffle(indices)  # Shuffle the indices
+
+    # Step 2: Calculate the sizes for train, test, and validation sets
+    num_flight_ids = output_array.shape[0]
+    train_size = int(0.8 * num_flight_ids)
+    test_size = int(0.1 * num_flight_ids)
+    val_size = num_flight_ids - train_size - test_size  # Remaining for validation
+
+    # Step 3: Split the shuffled indices into train, test, and validation sets
+    train_indices = indices[:train_size]
+    test_indices = indices[train_size:train_size + test_size]
+    val_indices = indices[train_size + test_size:]
+
+    # Step 4: Use the indices to slice the output_array, excluding the flight_id column (last column)
+    train_array = output_array[train_indices, :, :-1]  # Exclude the last column (flight_id)
+    test_array = output_array[test_indices, :, :-1]    # Exclude the last column (flight_id)
+    val_array = output_array[val_indices, :, :-1]      # Exclude the last column (flight_id)
+
+    # Output the shapes of the resulting arrays
+    print(f"Train array shape: {train_array.shape}")
+    print(f"Test array shape: {test_array.shape}")
+    print(f"Validation array shape: {val_array.shape}")
+
+    return train_array, test_array, val_array
 
 def save_arrays_to_npz(train_array, test_array, val_array, train_file, test_file, val_file):
     """
@@ -151,42 +228,99 @@ def save_arrays_to_npz(train_array, test_array, val_array, train_file, test_file
     print(f"Testing data saved to {test_file}")
     print(f"Validation data saved to {val_file}")
 
+import matplotlib.pyplot as plt
+from matplotlib.collections import LineCollection
+
+def plot_trajectories(trajectory_array, figsize=(10, 8), linewidth=1.5, alpha=0.7):
+    """
+    Plot flight trajectories with altitude-based color gradient.
+    
+    Parameters:
+        trajectory_array (np.ndarray): Array of shape (num_trajectories, num_timesteps, num_features)
+                                       where features are assumed to be [latitude, longitude, altitude, ...]
+        figsize (tuple): Figure size (width, height) in inches
+        linewidth (float): Width of trajectory lines
+        alpha (float): Transparency of lines (0-1)
+    """
+    plt.figure(figsize=figsize)
+    
+    # Create a colormap for altitude (using viridis, but you can change this)
+    cmap = plt.get_cmap('viridis')
+    
+    for traj in trajectory_array:
+        # Extract coordinates and altitude
+        lats = traj[:, 0]  # Latitude
+        lons = traj[:, 1]  # Longitude
+        alts = traj[:, 2]  # Altitude
+        
+        # Normalize altitude for coloring
+        norm = plt.Normalize(alts.min(), alts.max())
+        
+        # Create segments for LineCollection
+        points = np.array([lons, lats]).T.reshape(-1, 1, 2)
+        segments = np.concatenate([points[:-1], points[1:]], axis=1)
+        
+        # Create line collection with color gradient
+        lc = LineCollection(segments, cmap=cmap, norm=norm,
+                            linewidth=linewidth, alpha=alpha)
+        lc.set_array(alts)
+        plt.gca().add_collection(lc)
+    
+    # Set plot limits and labels
+    plt.xlim(trajectory_array[:, :, 1].min(), trajectory_array[:, :, 1].max())
+    plt.ylim(trajectory_array[:, :, 0].min(), trajectory_array[:, :, 0].max())
+    plt.xlabel('Longitude')
+    plt.ylabel('Latitude')
+    
+    # Add colorbar
+    cbar = plt.colorbar(plt.cm.ScalarMappable(norm=norm, cmap=cmap), ax=plt.gca())
+    cbar.set_label('Altitude')
+    
+    plt.title('Flight Trajectories (Colored by Altitude)')
+    plt.grid(True)
+    plt.tight_layout()
+    plt.show()
+
+sample_rate = 20
 
 ### ESSA_LFPG ###
-output = numpy_array(r"C:\Users\gungo\Downloads\ESSA_LFPG.csv")
-ESSA_LFPG_train_array, ESSA_LFPG_test_array , ESSA_LFPG_val_array = array_split(output)
+output_ESSA_LFPG = numpy_array_sampled(r"C:\Users\gungo\Downloads\ESSA_LFPG.csv", sample_rate)
+ESSA_LFPG_train_array, ESSA_LFPG_test_array , ESSA_LFPG_val_array = array_split_seed(output_ESSA_LFPG)
 
 output_dir = r"C:\Users\gungo\OneDrive\Desktop\A05 Data"  # Use raw string to avoid escaping backslashes
 
 # Define the full paths for the output files
-ESSA_LFPG_train_file = f"{output_dir}/ESSA_LFPG_train_data.npz"
-ESSA_LFPG_test_file = f"{output_dir}/ESSA_LFPG_test_data.npz"
-ESSA_LFPG_val_file = f"{output_dir}/ESSA_LFPG_val_data.npz"
+ESSA_LFPG_train_file = f"{output_dir}/ESSA_LFPG_train_data_n={sample_rate}.npz"
+ESSA_LFPG_test_file = f"{output_dir}/ESSA_LFPG_test_data_n={sample_rate}.npz"
+ESSA_LFPG_val_file = f"{output_dir}/ESSA_LFPG_val_data_n={sample_rate}.npz"
 
-save_arrays_to_npz(ESSA_LFPG_train_array, ESSA_LFPG_test_array, ESSA_LFPG_val_array, ESSA_LFPG_train_file, ESSA_LFPG_test_file, ESSA_LFPG_val_file)
+#save_arrays_to_npz(ESSA_LFPG_train_array, ESSA_LFPG_test_array, ESSA_LFPG_val_array, ESSA_LFPG_train_file, ESSA_LFPG_test_file, ESSA_LFPG_val_file)
 
 ### LOWW_EGLL ###
-output = numpy_array(r"C:\Users\gungo\Downloads\LOWW_EGLL.csv")
-LOWW_EGLL_train_array, LOWW_EGLL_test_array , LOWW_EGLL_val_array = array_split(output)
+output_LOWW_EGLL = numpy_array_sampled(r"C:\Users\gungo\Downloads\LOWW_EGLL.csv", sample_rate)
+LOWW_EGLL_train_array, LOWW_EGLL_test_array , LOWW_EGLL_val_array = array_split_seed(output_LOWW_EGLL)
 
 output_dir = r"C:\Users\gungo\OneDrive\Desktop\A05 Data"  # Use raw string to avoid escaping backslashes
 
 # Define the full paths for the output files
-LOWW_EGLL_train_file = f"{output_dir}/LOWW_EGLL_train_data.npz"
-LOWW_EGLL_test_file = f"{output_dir}/LOWW_EGLL_test_data.npz"
-LOWW_EGLL_val_file = f"{output_dir}/LOWW_EGLL_val_data.npz"
+LOWW_EGLL_train_file = f"{output_dir}/LOWW_EGLL_train_dataa_n={sample_rate}.npz"
+LOWW_EGLL_test_file = f"{output_dir}/LOWW_EGLL_test_dataa_n={sample_rate}.npz"
+LOWW_EGLL_val_file = f"{output_dir}/LOWW_EGLL_val_dataa_n={sample_rate}.npz"
 
-save_arrays_to_npz(LOWW_EGLL_train_array, LOWW_EGLL_test_array, LOWW_EGLL_val_array, LOWW_EGLL_train_file, LOWW_EGLL_test_file, LOWW_EGLL_val_file)
+#save_arrays_to_npz(LOWW_EGLL_train_array, LOWW_EGLL_test_array, LOWW_EGLL_val_array, LOWW_EGLL_train_file, LOWW_EGLL_test_file, LOWW_EGLL_val_file)
 
 ### EHAM_LIMC ###
-output = numpy_array(r"C:\Users\gungo\Downloads\EHAM_LIMC.csv")
-EHAM_LIMC_train_array, EHAM_LIMC_test_array , EHAM_LIMC_val_array = array_split(output)
+output_EHAM_LIMC = numpy_array_sampled(r"C:\Users\gungo\Downloads\EHAM_LIMC.csv", sample_rate)
+EHAM_LIMC_train_array, EHAM_LIMC_test_array , EHAM_LIMC_val_array = array_split_seed(output_EHAM_LIMC)
 
 output_dir = r"C:\Users\gungo\OneDrive\Desktop\A05 Data"  # Use raw string to avoid escaping backslashes
 
 # Define the full paths for the output files
-EHAM_LIMC_train_file = f"{output_dir}/EHAM_LIMC_train_data.npz"
-EHAM_LIMC_test_file = f"{output_dir}/EHAM_LIMC_test_data.npz"
-EHAM_LIMC_val_file = f"{output_dir}/EHAM_LIMC_val_data.npz"
+EHAM_LIMC_train_file = f"{output_dir}/EHAM_LIMC_train_dataa_n={sample_rate}.npz"
+EHAM_LIMC_test_file = f"{output_dir}/EHAM_LIMC_test_dataa_n={sample_rate}.npz"
+EHAM_LIMC_val_file = f"{output_dir}/EHAM_LIMC_val_dataa_n={sample_rate}.npz"
 
-save_arrays_to_npz(EHAM_LIMC_train_array, EHAM_LIMC_test_array, EHAM_LIMC_val_array, EHAM_LIMC_train_file, EHAM_LIMC_test_file, EHAM_LIMC_val_file)
+#save_arrays_to_npz(EHAM_LIMC_train_array, EHAM_LIMC_test_array, EHAM_LIMC_val_array, EHAM_LIMC_train_file, EHAM_LIMC_test_file, EHAM_LIMC_val_file)
+
+
+plot_trajectories(ESSA_LFPG_val_array, figsize=(10, 8), linewidth=1.5, alpha=0.7)

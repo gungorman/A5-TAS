@@ -4,7 +4,6 @@ import os
 import pandas as pd, numpy as np
 from sklearn.manifold import TSNE
 from typing import Optional
-
 TITLE_FONT_SIZE = 16
 
 
@@ -63,7 +62,7 @@ def plot_samples(
     plt.show()
 
 
-def plot_latent_space_samples(vae, n: int, figsize: tuple) -> None:
+def plot_latent_space_samples(vae, n: int, figsize: tuple, nr_epochs) -> None:
     """
     Plot samples from a 2D latent space.
 
@@ -120,6 +119,7 @@ def visualize_and_save_tsne(
     scenario_name: str,
     save_dir: str,
     max_samples: int = 1000,
+    
 ) -> None:
     """
     Visualize the t-SNE of two sets of samples and save to file.
@@ -186,5 +186,4 @@ def visualize_and_save_tsne(
     # Save the plot to a file
     os.makedirs(save_dir, exist_ok=True)
     plt.savefig(os.path.join(save_dir, f"{scenario_name}.png"))
-
     plt.show()
