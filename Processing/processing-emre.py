@@ -228,20 +228,23 @@ def save_arrays_to_npz(train_array, test_array, val_array, train_file, test_file
     print(f"Testing data saved to {test_file}")
     print(f"Validation data saved to {val_file}")
 
+
 import matplotlib.pyplot as plt
 from matplotlib.collections import LineCollection
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 def plot_trajectories_comparison(array1, array2, 
                                  titles=('Trajectories 1', 'Trajectories 2'),
                                  figsize=(16, 6), linewidth=1.5, alpha=0.7):
     """
     Plot two sets of flight trajectories side-by-side with altitude-based color gradients.
+    Color bar is placed on the right side of the figure, outside the subplots.
     
     Parameters:
         array1 (np.ndarray): First trajectory array (num_traj, timesteps, features)
         array2 (np.ndarray): Second trajectory array (num_traj, timesteps, features)
         titles (tuple): Titles for each subplot
-        figsize (tuple): Overall figure size
+        figsize (tuple): Overall figure size (width, height)
         linewidth (float): Width of trajectory lines
         alpha (float): Transparency of lines
     """
@@ -250,6 +253,11 @@ def plot_trajectories_comparison(array1, array2,
     # Create a colormap for altitude (using viridis)
     cmap = plt.get_cmap('viridis')
     
+    # Determine global min/max for consistent coloring
+    global_alt_min = min(array1[:, :, 2].min(), array2[:, :, 2].min())
+    global_alt_max = max(array1[:, :, 2].max(), array2[:, :, 2].max())
+    norm = plt.Normalize(global_alt_min, global_alt_max)
+    
     def plot_single_array(ax, array, title):
         """Helper function to plot one array"""
         for traj in array:
@@ -257,14 +265,11 @@ def plot_trajectories_comparison(array1, array2,
             lons = traj[:, 1]  # Longitude
             alts = traj[:, 2]  # Altitude
             
-            norm = plt.Normalize(min(array1[:, :, 2].min(), array2[:, :, 2].min()),
-                                max(array1[:, :, 2].max(), array2[:, :, 2].max()))
-            
             points = np.array([lons, lats]).T.reshape(-1, 1, 2)
             segments = np.concatenate([points[:-1], points[1:]], axis=1)
             
             lc = LineCollection(segments, cmap=cmap, norm=norm,
-                                linewidth=linewidth, alpha=alpha)
+                              linewidth=linewidth, alpha=alpha)
             lc.set_array(alts)
             ax.add_collection(lc)
         
@@ -281,12 +286,14 @@ def plot_trajectories_comparison(array1, array2,
     plot_single_array(ax1, array1, titles[0])
     plot_single_array(ax2, array2, titles[1])
     
-    # Add a single colorbar for both plots
-    norm = plt.Normalize(min(array1[:, :, 2].min(), array2[:, :, 2].min()),
-                        max(array1[:, :, 2].max(), array2[:, :, 2].max()))
+    # Create an axis for the colorbar on the right side
+    divider = make_axes_locatable(ax2)
+    cax = divider.append_axes("right", size="5%", pad=0.5)
+    
+    # Add colorbar
     sm = plt.cm.ScalarMappable(norm=norm, cmap=cmap)
     sm.set_array([])
-    fig.colorbar(sm, ax=[ax1, ax2], label='Altitude')
+    cbar = fig.colorbar(sm, cax=cax, label='Altitude')
     
     plt.tight_layout()
     plt.show()
