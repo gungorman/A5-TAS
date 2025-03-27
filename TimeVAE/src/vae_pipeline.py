@@ -24,6 +24,7 @@ from vae.vae_utils import (
 )
 from visualize import plot_samples, plot_latent_space_samples, visualize_and_save_tsne
 
+nr_epochs=100
 
 def run_vae_pipeline(dataset_name: str, vae_type: str):
     # ----------------------------------------------------------------------------------
@@ -57,7 +58,7 @@ def run_vae_pipeline(dataset_name: str, vae_type: str):
     train_vae(
         vae=vae_model,
         train_data=scaled_train_data,
-        max_epochs=1000,
+        max_epochs=nr_epochs,
         verbose=1,
     )
 

@@ -1,9 +1,9 @@
 import numpy as np
 import math 
 
-X=np.zeros(2)
-print(X)
-X[0, :]=[1, 2, 3]
-u=X[:, :2]
-print(u)
-print(math.sin(0.5*math.pi))
+u_0=23
+u_1=22
+u=np.zeros((2, 2))
+k=-1
+k_abs=abs(k)
+print(k_abs)
