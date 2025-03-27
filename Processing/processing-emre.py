@@ -228,58 +228,66 @@ def save_arrays_to_npz(train_array, test_array, val_array, train_file, test_file
     print(f"Testing data saved to {test_file}")
     print(f"Validation data saved to {val_file}")
 
-
 import matplotlib.pyplot as plt
 from matplotlib.collections import LineCollection
 
-
-def plot_trajectories(trajectory_array, figsize=(10, 8), linewidth=1.5, alpha=0.7):
+def plot_trajectories_comparison(array1, array2, 
+                                 titles=('Trajectories 1', 'Trajectories 2'),
+                                 figsize=(16, 6), linewidth=1.5, alpha=0.7):
     """
-    Plot flight trajectories with altitude-based color gradient.
+    Plot two sets of flight trajectories side-by-side with altitude-based color gradients.
     
     Parameters:
-        trajectory_array (np.ndarray): Array of shape (num_trajectories, num_timesteps, num_features)
-                                       where features are assumed to be [latitude, longitude, altitude, ...]
-        figsize (tuple): Figure size (width, height) in inches
+        array1 (np.ndarray): First trajectory array (num_traj, timesteps, features)
+        array2 (np.ndarray): Second trajectory array (num_traj, timesteps, features)
+        titles (tuple): Titles for each subplot
+        figsize (tuple): Overall figure size
         linewidth (float): Width of trajectory lines
-        alpha (float): Transparency of lines (0-1)
+        alpha (float): Transparency of lines
     """
-    plt.figure(figsize=figsize)
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=figsize)
     
-    # Create a colormap for altitude (using viridis, but you can change this)
+    # Create a colormap for altitude (using viridis)
     cmap = plt.get_cmap('viridis')
     
-    for traj in trajectory_array:
-        # Extract coordinates and altitude
-        lats = traj[:, 0]  # Latitude
-        lons = traj[:, 1]  # Longitude
-        alts = traj[:, 2]  # Altitude
+    def plot_single_array(ax, array, title):
+        """Helper function to plot one array"""
+        for traj in array:
+            lats = traj[:, 0]  # Latitude
+            lons = traj[:, 1]  # Longitude
+            alts = traj[:, 2]  # Altitude
+            
+            norm = plt.Normalize(min(array1[:, :, 2].min(), array2[:, :, 2].min()),
+                                max(array1[:, :, 2].max(), array2[:, :, 2].max()))
+            
+            points = np.array([lons, lats]).T.reshape(-1, 1, 2)
+            segments = np.concatenate([points[:-1], points[1:]], axis=1)
+            
+            lc = LineCollection(segments, cmap=cmap, norm=norm,
+                                linewidth=linewidth, alpha=alpha)
+            lc.set_array(alts)
+            ax.add_collection(lc)
         
-        # Normalize altitude for coloring
-        norm = plt.Normalize(alts.min(), alts.max())
-        
-        # Create segments for LineCollection
-        points = np.array([lons, lats]).T.reshape(-1, 1, 2)
-        segments = np.concatenate([points[:-1], points[1:]], axis=1)
-        
-        # Create line collection with color gradient
-        lc = LineCollection(segments, cmap=cmap, norm=norm,
-                            linewidth=linewidth, alpha=alpha)
-        lc.set_array(alts)
-        plt.gca().add_collection(lc)
+        ax.set_xlim(min(array1[:, :, 1].min(), array2[:, :, 1].min()),
+                   max(array1[:, :, 1].max(), array2[:, :, 1].max()))
+        ax.set_ylim(min(array1[:, :, 0].min(), array2[:, :, 0].min()),
+                   max(array1[:, :, 0].max(), array2[:, :, 0].max()))
+        ax.set_xlabel('Longitude')
+        ax.set_ylabel('Latitude')
+        ax.set_title(title)
+        ax.grid(True)
     
-    # Set plot limits and labels
-    plt.xlim(trajectory_array[:, :, 1].min(), trajectory_array[:, :, 1].max())
-    plt.ylim(trajectory_array[:, :, 0].min(), trajectory_array[:, :, 0].max())
-    plt.xlabel('Longitude')
-    plt.ylabel('Latitude')
+    # Plot both arrays
+    plot_single_array(ax1, array1, titles[0])
+    plot_single_array(ax2, array2, titles[1])
     
-    # Add colorbar
-    cbar = plt.colorbar(plt.cm.ScalarMappable(norm=norm, cmap=cmap), ax=plt.gca())
-    cbar.set_label('Altitude')
+    # Add a single colorbar for both plots
+    norm = plt.Normalize(min(array1[:, :, 2].min(), array2[:, :, 2].min()),
+                        max(array1[:, :, 2].max(), array2[:, :, 2].max()))
+    sm = plt.cm.ScalarMappable(norm=norm, cmap=cmap)
+    sm.set_array([])
+    fig.colorbar(sm, ax=[ax1, ax2], label='Altitude')
     
-    plt.title('Flight Trajectories (Colored by Altitude)')
-    plt.grid(True)
     plt.tight_layout()
     plt.show()
 
@@ -312,7 +320,7 @@ def load_single_array(npz_file_path, array_name):
         raise FileNotFoundError(f"File not found: {npz_file_path}")
 
 
-sample_rate = 20
+sample_rate = 40
 
 ### ESSA_LFPG ###
 output_ESSA_LFPG = numpy_array_sampled(r"C:\Users\gungo\Downloads\ESSA_LFPG.csv", sample_rate)
@@ -353,7 +361,16 @@ EHAM_LIMC_val_file = f"{output_dir}/EHAM_LIMC_val_dataa_n={sample_rate}.npz"
 
 #save_arrays_to_npz(EHAM_LIMC_train_array, EHAM_LIMC_test_array, EHAM_LIMC_val_array, EHAM_LIMC_train_file, EHAM_LIMC_test_file, EHAM_LIMC_val_file)
 
-plot_trajectories(EHAM_LIMC_val_file, figsize=(10, 8), linewidth=1.5, alpha=0.7)
-result = load_single_array(r"C:\Users\gungo\Downloads\timeVAE_EHAM_LIMC_train_dataa_n=40_prior_samples.npz", "result")
+
+result = load_single_array(r"C:\Users\gungo\Downloads\timeVAE_EHAM_LIMC_train_dataa_n=40_prior_samples.npz", "data")
 print(result.shape)
-plot_trajectories(result, figsize=(10, 8), linewidth=1.5, alpha=0.7)
+array1 = EHAM_LIMC_train_array
+array2 = result
+
+# Plot comparison
+plot_trajectories_comparison(
+    array1, 
+    array2,
+    titles=('Original Trajectories', 'Generated Trajectories'),
+    figsize=(18, 7)
+)
