@@ -228,6 +228,58 @@ def save_arrays_to_npz(train_array, test_array, val_array, train_file, test_file
     print(f"Testing data saved to {test_file}")
     print(f"Validation data saved to {val_file}")
 
+import matplotlib.pyplot as plt
+from matplotlib.collections import LineCollection
+
+def plot_trajectories(trajectory_array, figsize=(10, 8), linewidth=1.5, alpha=0.7):
+    """
+    Plot flight trajectories with altitude-based color gradient.
+    
+    Parameters:
+        trajectory_array (np.ndarray): Array of shape (num_trajectories, num_timesteps, num_features)
+                                       where features are assumed to be [latitude, longitude, altitude, ...]
+        figsize (tuple): Figure size (width, height) in inches
+        linewidth (float): Width of trajectory lines
+        alpha (float): Transparency of lines (0-1)
+    """
+    plt.figure(figsize=figsize)
+    
+    # Create a colormap for altitude (using viridis, but you can change this)
+    cmap = plt.get_cmap('viridis')
+    
+    for traj in trajectory_array:
+        # Extract coordinates and altitude
+        lats = traj[:, 0]  # Latitude
+        lons = traj[:, 1]  # Longitude
+        alts = traj[:, 2]  # Altitude
+        
+        # Normalize altitude for coloring
+        norm = plt.Normalize(alts.min(), alts.max())
+        
+        # Create segments for LineCollection
+        points = np.array([lons, lats]).T.reshape(-1, 1, 2)
+        segments = np.concatenate([points[:-1], points[1:]], axis=1)
+        
+        # Create line collection with color gradient
+        lc = LineCollection(segments, cmap=cmap, norm=norm,
+                            linewidth=linewidth, alpha=alpha)
+        lc.set_array(alts)
+        plt.gca().add_collection(lc)
+    
+    # Set plot limits and labels
+    plt.xlim(trajectory_array[:, :, 1].min(), trajectory_array[:, :, 1].max())
+    plt.ylim(trajectory_array[:, :, 0].min(), trajectory_array[:, :, 0].max())
+    plt.xlabel('Longitude')
+    plt.ylabel('Latitude')
+    
+    # Add colorbar
+    cbar = plt.colorbar(plt.cm.ScalarMappable(norm=norm, cmap=cmap), ax=plt.gca())
+    cbar.set_label('Altitude')
+    
+    plt.title('Flight Trajectories (Colored by Altitude)')
+    plt.grid(True)
+    plt.tight_layout()
+    plt.show()
 
 sample_rate = 20
 
@@ -242,7 +294,7 @@ ESSA_LFPG_train_file = f"{output_dir}/ESSA_LFPG_train_data_n={sample_rate}.npz"
 ESSA_LFPG_test_file = f"{output_dir}/ESSA_LFPG_test_data_n={sample_rate}.npz"
 ESSA_LFPG_val_file = f"{output_dir}/ESSA_LFPG_val_data_n={sample_rate}.npz"
 
-save_arrays_to_npz(ESSA_LFPG_train_array, ESSA_LFPG_test_array, ESSA_LFPG_val_array, ESSA_LFPG_train_file, ESSA_LFPG_test_file, ESSA_LFPG_val_file)
+#save_arrays_to_npz(ESSA_LFPG_train_array, ESSA_LFPG_test_array, ESSA_LFPG_val_array, ESSA_LFPG_train_file, ESSA_LFPG_test_file, ESSA_LFPG_val_file)
 
 ### LOWW_EGLL ###
 output_LOWW_EGLL = numpy_array_sampled(r"C:\Users\gungo\Downloads\LOWW_EGLL.csv", sample_rate)
@@ -255,7 +307,7 @@ LOWW_EGLL_train_file = f"{output_dir}/LOWW_EGLL_train_dataa_n={sample_rate}.npz"
 LOWW_EGLL_test_file = f"{output_dir}/LOWW_EGLL_test_dataa_n={sample_rate}.npz"
 LOWW_EGLL_val_file = f"{output_dir}/LOWW_EGLL_val_dataa_n={sample_rate}.npz"
 
-save_arrays_to_npz(LOWW_EGLL_train_array, LOWW_EGLL_test_array, LOWW_EGLL_val_array, LOWW_EGLL_train_file, LOWW_EGLL_test_file, LOWW_EGLL_val_file)
+#save_arrays_to_npz(LOWW_EGLL_train_array, LOWW_EGLL_test_array, LOWW_EGLL_val_array, LOWW_EGLL_train_file, LOWW_EGLL_test_file, LOWW_EGLL_val_file)
 
 ### EHAM_LIMC ###
 output_EHAM_LIMC = numpy_array_sampled(r"C:\Users\gungo\Downloads\EHAM_LIMC.csv", sample_rate)
@@ -268,6 +320,7 @@ EHAM_LIMC_train_file = f"{output_dir}/EHAM_LIMC_train_dataa_n={sample_rate}.npz"
 EHAM_LIMC_test_file = f"{output_dir}/EHAM_LIMC_test_dataa_n={sample_rate}.npz"
 EHAM_LIMC_val_file = f"{output_dir}/EHAM_LIMC_val_dataa_n={sample_rate}.npz"
 
-save_arrays_to_npz(EHAM_LIMC_train_array, EHAM_LIMC_test_array, EHAM_LIMC_val_array, EHAM_LIMC_train_file, EHAM_LIMC_test_file, EHAM_LIMC_val_file)
+#save_arrays_to_npz(EHAM_LIMC_train_array, EHAM_LIMC_test_array, EHAM_LIMC_val_array, EHAM_LIMC_train_file, EHAM_LIMC_test_file, EHAM_LIMC_val_file)
 
 
+plot_trajectories(ESSA_LFPG_val_array, figsize=(10, 8), linewidth=1.5, alpha=0.7)
