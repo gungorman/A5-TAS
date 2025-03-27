@@ -228,8 +228,10 @@ def save_arrays_to_npz(train_array, test_array, val_array, train_file, test_file
     print(f"Testing data saved to {test_file}")
     print(f"Validation data saved to {val_file}")
 
+
 import matplotlib.pyplot as plt
 from matplotlib.collections import LineCollection
+
 
 def plot_trajectories(trajectory_array, figsize=(10, 8), linewidth=1.5, alpha=0.7):
     """
@@ -281,6 +283,35 @@ def plot_trajectories(trajectory_array, figsize=(10, 8), linewidth=1.5, alpha=0.
     plt.tight_layout()
     plt.show()
 
+
+def load_single_array(npz_file_path, array_name):
+    """
+    Load a single NumPy array from an .npz file.
+    
+    Parameters:
+        npz_file_path (str): Path to the .npz file
+        array_name (str): Name of the array to load
+        
+    Returns:
+        np.ndarray: The requested NumPy array
+        
+    Raises:
+        FileNotFoundError: If the .npz file doesn't exist
+        KeyError: If the specified array doesn't exist in the file
+    """
+    try:
+        with np.load(npz_file_path) as data:
+            if array_name not in data:
+                available = list(data.keys())
+                raise KeyError(
+                    f"Array '{array_name}' not found. "
+                    f"Available arrays: {available}"
+                )
+            return data[array_name]
+    except FileNotFoundError:
+        raise FileNotFoundError(f"File not found: {npz_file_path}")
+
+
 sample_rate = 20
 
 ### ESSA_LFPG ###
@@ -322,5 +353,7 @@ EHAM_LIMC_val_file = f"{output_dir}/EHAM_LIMC_val_dataa_n={sample_rate}.npz"
 
 #save_arrays_to_npz(EHAM_LIMC_train_array, EHAM_LIMC_test_array, EHAM_LIMC_val_array, EHAM_LIMC_train_file, EHAM_LIMC_test_file, EHAM_LIMC_val_file)
 
-
-plot_trajectories(ESSA_LFPG_val_array, figsize=(10, 8), linewidth=1.5, alpha=0.7)
+plot_trajectories(EHAM_LIMC_val_file, figsize=(10, 8), linewidth=1.5, alpha=0.7)
+result = load_single_array(r"C:\Users\gungo\Downloads\timeVAE_EHAM_LIMC_train_dataa_n=40_prior_samples.npz", "result")
+print(result.shape)
+plot_trajectories(result, figsize=(10, 8), linewidth=1.5, alpha=0.7)
