@@ -11,7 +11,7 @@ file_paths = {
     'LOWW_EGLL': 'Validation/LOWW_EGLL.csv'
 }
 features = ['latitude', 'longitude', 'altitude', 'timedelta']
-target_n_trajectories_per_pair = 750
+target_n_trajectories_per_pair = 2000
 perplexity = 10
 
 # Step 1: Load and preprocess data
