@@ -8,7 +8,11 @@ import matplotlib.pyplot as plt
 from scipy.linalg import sqrtm
 
 ## Import the data EDIT THE ROUTE
-data = np.genfromtxt('C:/Sofia/TU Delft/Bsc2/Proyect/second semester/EHAM_LIMC.csv', delimiter=',')
+r_data_npz = np.load('C:/Sofia/TU Delft/Bsc2/Proyect/second semester/EHAM_LIMC_test_dataa_n=40.npz')
+s_data_npz = np.load('C:/Sofia/TU Delft/Bsc2/Proyect/second semester/timeVAE_EHAM_LIMC_gen_data_n=40.npz')
+
+r_data = r_data_npz['test']
+s_data = s_data_npz['data']
 
 ## Stuff for validating the tool
 
@@ -84,7 +88,7 @@ def FID_dtp(real_dtp, synth_dtp):
 
     return fid_score, real_means_dtp, synth_means_dtp
 
-fid = FID(data, data)
+fid = FID(r_data,s_data)
 
 print("FID mean:", np.mean(fid[0])) ## mean FID for single valued comparison
 # Plot FID scores
