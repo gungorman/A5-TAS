@@ -1,8 +1,11 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+#import NPZ file here for generated data
+
+
+
 def autocorrelation(series, max_lag):
-    """Compute autocorrelation for a given time series up to max_lag."""
     n = len(series)
     mean = np.mean(series)
     var = np.var(series)
@@ -14,7 +17,6 @@ def autocorrelation(series, max_lag):
     return acf
 
 def compute_acd(real, fake, max_lag):
-    """Compute Autocorrelation Difference (ACD) for real vs. synthetic data."""
     acd_x = np.abs(autocorrelation(real[:, 0], max_lag) - autocorrelation(fake[:, 0], max_lag))
     acd_y = np.abs(autocorrelation(real[:, 1], max_lag) - autocorrelation(fake[:, 1], max_lag))
     acd_z = np.abs(autocorrelation(real[:, 2], max_lag) - autocorrelation(fake[:, 2], max_lag))
@@ -22,7 +24,6 @@ def compute_acd(real, fake, max_lag):
     return np.mean([acd_x, acd_y, acd_z], axis=0)  # Aggregate over dimensions
 
 def compute_speed_magnitude(data):
-    """Compute speed magnitude at each time step."""
     diff = np.diff(data, axis=0)  # Compute differences between consecutive points
     speed = np.linalg.norm(diff, axis=1)  # Compute Euclidean speed
     return speed
