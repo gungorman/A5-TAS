@@ -8,27 +8,25 @@ import matplotlib.pyplot as plt
 from scipy.linalg import sqrtm
 
 ## Import the data EDIT THE ROUTE
-r_data_npz = np.load('C:/Sofia/TU Delft/Bsc2/Proyect/second semester/EHAM_LIMC_test_dataa_n=40.npz')
-s_data_npz = np.load('C:/Sofia/TU Delft/Bsc2/Proyect/second semester/timeVAE_EHAM_LIMC_gen_data_n=40.npz')
+route = "ESSA_LFPG"
+n = 20
 
-r_data = r_data_npz['test']
+r_data_npz = np.load('C:/Sofia/TU Delft/Bsc2/Proyect/second semester/' + str(route) + '_train_data_n=' + str(n) + '.npz')
+s_data_npz = np.load('C:/Sofia/TU Delft/Bsc2/Proyect/second semester/' + str(route) + '_gen_data_n=' + str(n) + '.npz')
+
+r_data = r_data_npz['data']
 s_data = s_data_npz['data']
 
+r_data = [item for sublist in r_data for item in sublist]
+s_data = [item for sublist in s_data for item in sublist]
 ## Stuff for validating the tool
-
-#data = np.delete(data, 0, 0)
-## Data split for testing
-#data1 = data[:int(len(data)/2)]
-#data2 = data[int(len(data)/2):]
-# Add 50000 to all values in the third column of data2 (for testing)
-# data2[:, 2] += 2000
 
 def FID(real_data, synth_data):
     ## Clean the data to obtain an array with just the 4 relevant info
-    real_data = np.delete(real_data, 0, 0)
-    real_data = np.delete(real_data, np.s_[4:], 1)
-    synth_data = np.delete(synth_data, 0, 0)
-    synth_data = np.delete(synth_data, np.s_[4:], 1)
+    #real_data = np.delete(real_data, 0, 0)
+    #real_data = np.delete(real_data, np.s_[4:], 1)
+    #synth_data = np.delete(synth_data, 0, 0)
+    #synth_data = np.delete(synth_data, np.s_[4:], 1)
     ## look for start of trajectories
     real_index = []
     synth_index = []
@@ -39,14 +37,13 @@ def FID(real_data, synth_data):
         if synth_data[i][3] == 0:
             synth_index.append(i)
     flight_size = real_index[1] ## This assumes all trajectories have the same size, which they do in this experiment 
-    # Calculate the global min and max for normalization
-    global_min = np.minimum(np.min(real_data, axis=0), np.min(synth_data, axis=0))
-    global_max = np.maximum(np.max(real_data, axis=0), np.max(synth_data, axis=0))
+    # Calculate the global mean and standard deviation for normalization
+    global_mean = np.mean(np.vstack((real_data, synth_data)), axis=0)
+    global_std = np.std(np.vstack((real_data, synth_data)), axis=0)
 
-    # Normalize the trajectories between -1 and 1 using global min and max
-    real_data = 2 * (real_data - global_min) / (global_max - global_min) - 1
-    synth_data = 2 * (synth_data - global_min) / (global_max - global_min) - 1
-
+    # Normalize the trajectories using global mean and standard deviation
+    real_data = (real_data - global_mean) / global_std
+    synth_data = (synth_data - global_mean) / global_std
     # Lists to store the FID scores
     fid_scores = []
 
