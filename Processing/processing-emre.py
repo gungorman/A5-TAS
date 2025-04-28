@@ -228,6 +228,18 @@ def save_arrays_to_npz(train_array, test_array, val_array, train_file, test_file
     print(f"Testing data saved to {test_file}")
     print(f"Validation data saved to {val_file}")
 
+def single_save_array_to_npz(train_array, train_file):
+    """
+    Save a training array into an .npz file.
+
+    Parameters:
+        train_array (np.ndarray): Training data array.
+        train_file (str): Full path for the training data file (e.g., 'data/train_data.npz').
+    """
+    # Save the array to an .npz file
+    np.savez(train_file, data=train_array)
+    
+    print(f"Training data saved to {train_file}")
 
 import matplotlib.pyplot as plt
 from matplotlib.collections import LineCollection
@@ -365,7 +377,7 @@ def filter_flights_by_location(flight_data, target_lon, target_lat, radius):
 # target_lon, target_lat = 5.75, 51.5
 # radius = 0.5
 # passing, others = filter_flights_by_location(flight_data, target_lon, target_lat, radius)
-sample_rate = 40
+sample_rate = 1
 
 ### ESSA_LFPG ###
 output_ESSA_LFPG = numpy_array_sampled(r"C:\Users\gungo\Downloads\ESSA_LFPG.csv", sample_rate)
@@ -387,32 +399,35 @@ LOWW_EGLL_train_array, LOWW_EGLL_test_array , LOWW_EGLL_val_array = array_split_
 output_dir = r"C:\Users\gungo\OneDrive\Desktop\A05 Data"  # Use raw string to avoid escaping backslashes
 
 # Define the full paths for the output files
-LOWW_EGLL_train_file = f"{output_dir}/LOWW_EGLL_train_dataa_n={sample_rate}.npz"
-LOWW_EGLL_test_file = f"{output_dir}/LOWW_EGLL_test_dataa_n={sample_rate}.npz"
-LOWW_EGLL_val_file = f"{output_dir}/LOWW_EGLL_val_dataa_n={sample_rate}.npz"
+LOWW_EGLL_train_file = f"{output_dir}/LOWW_EGLL_train_data_n={sample_rate}.npz"
+LOWW_EGLL_test_file = f"{output_dir}/LOWW_EGLL_test_data_n={sample_rate}.npz"
+LOWW_EGLL_val_file = f"{output_dir}/LOWW_EGLL_val_data_n={sample_rate}.npz"
 
 #save_arrays_to_npz(LOWW_EGLL_train_array, LOWW_EGLL_test_array, LOWW_EGLL_val_array, LOWW_EGLL_train_file, LOWW_EGLL_test_file, LOWW_EGLL_val_file)
 
 ### EHAM_LIMC ###
 output_EHAM_LIMC = numpy_array_sampled(r"C:\Users\gungo\Downloads\EHAM_LIMC.csv", sample_rate)
 EHAM_LIMC_train_array, EHAM_LIMC_test_array , EHAM_LIMC_val_array = array_split_seed(output_EHAM_LIMC)
+target_long = 4.75
+target_lat = 51.5
+radius = 0.4
+EHAM_LIMC_train_filtered = filter_flights_by_location(EHAM_LIMC_train_array, target_long, target_lat, radius)
 
 output_dir = r"C:\Users\gungo\OneDrive\Desktop\A05 Data"  # Use raw string to avoid escaping backslashes
 
 # Define the full paths for the output files
-EHAM_LIMC_train_file = f"{output_dir}/EHAM_LIMC_train_dataa_n={sample_rate}.npz"
-EHAM_LIMC_test_file = f"{output_dir}/EHAM_LIMC_test_dataa_n={sample_rate}.npz"
-EHAM_LIMC_val_file = f"{output_dir}/EHAM_LIMC_val_dataa_n={sample_rate}.npz"
+EHAM_LIMC_train_file = f"{output_dir}/EHAM_LIMC_train_data_n={sample_rate}.npz"
+EHAM_LIMC_test_file = f"{output_dir}/EHAM_LIMC_test_data_n={sample_rate}.npz"
+EHAM_LIMC_val_file = f"{output_dir}/EHAM_LIMC_val_data_n={sample_rate}.npz"
+EHAM_LIMC_train_filtered_file = f"{output_dir}/EHAM_LIMC_train_filtered_data_n={sample_rate}.npz"
 
 #save_arrays_to_npz(EHAM_LIMC_train_array, EHAM_LIMC_test_array, EHAM_LIMC_val_array, EHAM_LIMC_train_file, EHAM_LIMC_test_file, EHAM_LIMC_val_file)
-
+single_save_array_to_npz(EHAM_LIMC_train_filtered,EHAM_LIMC_train_filtered_file)
 result = load_single_array(r"C:\Users\gungo\Downloads\timeVAE_EHAM_LIMC_train_dataa_n=40_prior_samples.npz", "data")
 print(result.shape)
 array1 = EHAM_LIMC_train_array
-target_long = 4.75
-target_lat = 51.5
-radius = 0.35
-array2 = filter_flights_by_location(array1, target_long, target_lat, radius)
+array2 = EHAM_LIMC_train_filtered
+
 
 # Plot comparison
 plot_trajectories_comparison(
