@@ -30,7 +30,7 @@ print(f"Using {trajectory_summary.shape[0]} summarized points for PCA")
 # Step 3: Normalize and apply PCA
 scaler = StandardScaler()
 trajectory_summary = scaler.fit_transform(trajectory_summary)
-pca = PCA(n_components=2)
+pca = PCA(n_components=16)
 embedding_array = pca.fit_transform(trajectory_summary)
 explained_variance_ratio = pca.explained_variance_ratio_
 explained_variance_ratio = explained_variance_ratio ** 2
