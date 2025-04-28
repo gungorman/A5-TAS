@@ -5,7 +5,7 @@ import pandas as pd, numpy as np
 from sklearn.manifold import TSNE
 from typing import Optional
 TITLE_FONT_SIZE = 16
-
+nr_epochs=100
 
 def plot_samples(
     samples1: np.ndarray,
@@ -180,7 +180,7 @@ def visualize_and_save_tsne(
                 s=100,
             )
 
-    plt.title(f"t-SNE for {scenario_name}")
+    plt.title(f"t-SNE for {scenario_name} epochs {nr_epochs}")
     plt.legend()
 
     # Save the plot to a file
