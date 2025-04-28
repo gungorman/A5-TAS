@@ -6,7 +6,7 @@ import glob
 import matplotlib.cm as cm  # For colormap
 
 # === CONFIG ===
-data_folder = 'TimeVAE\\outputs\\generated_data'  # Use double backslashes
+data_folder = 'Code(ours)\\test_data'  # Use double backslashes
 file_pattern = '*.npz'
 
 # === READ & MERGE FILES ===
@@ -17,8 +17,8 @@ for file in npz_files:
     try:
         data = np.load(file)
         # The data array should have the shape (n_samples, n_timesteps, 4)
-        trajectory = data['data']  # Assuming the array of interest is stored in 'data'
-        
+        trajectory = data['test']  # Assuming the array of interest is stored in 'data'
+
         # Extract latitude, longitude, and altitude from the array
         latitude = trajectory[:, :, 0]  # Latitude is the first column
         longitude = trajectory[:, :, 1]  # Longitude is the second column
