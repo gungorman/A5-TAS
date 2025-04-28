@@ -326,7 +326,45 @@ def load_single_array(npz_file_path, array_name):
     except FileNotFoundError:
         raise FileNotFoundError(f"File not found: {npz_file_path}")
 
+def filter_flights_by_location(flight_data, target_lon, target_lat, radius):
+    """
+    Separate flights based on whether they pass through a circular area around a target point.
+    
+    Args:
+        flight_data: Array of shape (num_flights, num_timesteps, num_features)
+                    Features assumed to be in order: [latitude, longitude, altitude, timedelta]
+        target_lon: Longitude of target point
+        target_lat: Latitude of target point
+        radius: Radius in degrees for considering a match
+        
+    Returns:
+        passing_flights: Array of flights that pass through the area
+        other_flights: Array of flights that don't pass through the area
+    """
+    passing_indices = []
+    
+    for i, flight in enumerate(flight_data):
+        # Extract latitude and longitude for this flight
+        lats = flight[:, 0]  # Latitude is first feature
+        lons = flight[:, 1]  # Longitude is second feature
+        
+        # Calculate distance from target point for each timestep
+        distances = np.sqrt((lons - target_lon)**2 + (lats - target_lat)**2)
+        
+        # Check if any point is within the radius
+        if np.any(distances <= radius):
+            passing_indices.append(i)
+    
+    # Separate the flights
+    passing_flights = flight_data[passing_indices]
+    
+    return passing_flights
 
+# Example usage:
+# flight_data = np.array(...)  # Your flight data array
+# target_lon, target_lat = 5.75, 51.5
+# radius = 0.5
+# passing, others = filter_flights_by_location(flight_data, target_lon, target_lat, radius)
 sample_rate = 40
 
 ### ESSA_LFPG ###
@@ -368,11 +406,13 @@ EHAM_LIMC_val_file = f"{output_dir}/EHAM_LIMC_val_dataa_n={sample_rate}.npz"
 
 #save_arrays_to_npz(EHAM_LIMC_train_array, EHAM_LIMC_test_array, EHAM_LIMC_val_array, EHAM_LIMC_train_file, EHAM_LIMC_test_file, EHAM_LIMC_val_file)
 
-
 result = load_single_array(r"C:\Users\gungo\Downloads\timeVAE_EHAM_LIMC_train_dataa_n=40_prior_samples.npz", "data")
 print(result.shape)
 array1 = EHAM_LIMC_train_array
-array2 = result
+target_long = 4.75
+target_lat = 51.5
+radius = 0.35
+array2 = filter_flights_by_location(array1, target_long, target_lat, radius)
 
 # Plot comparison
 plot_trajectories_comparison(
@@ -381,3 +421,4 @@ plot_trajectories_comparison(
     titles=('Original Trajectories', 'Generated Trajectories'),
     figsize=(18, 7)
 )
+
