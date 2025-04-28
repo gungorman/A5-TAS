@@ -423,10 +423,12 @@ EHAM_LIMC_train_filtered_file = f"{output_dir}/EHAM_LIMC_train_filtered_data_n={
 
 #save_arrays_to_npz(EHAM_LIMC_train_array, EHAM_LIMC_test_array, EHAM_LIMC_val_array, EHAM_LIMC_train_file, EHAM_LIMC_test_file, EHAM_LIMC_val_file)
 #single_save_array_to_npz(EHAM_LIMC_train_filtered,EHAM_LIMC_train_filtered_file)
-result = load_single_array(r"C:\Users\gungo\Downloads\timeVAE_LOWW_EGLL_train_dataa_n=40_prior_samples.npz", "data")
-print(result.shape)
-array1 = LOWW_EGLL_train_array
-array2 = result
+result1 = load_single_array(r"C:\Users\gungo\Downloads\ESSA_LFPG_val_data_n=20.npz", "data")
+print(result1.shape)
+result2 = load_single_array(r"C:\Users\gungo\Downloads\timeVAE_ESSA_LFPG_train_data_n=20_Generated.npz", "data")
+print(result2.shape)
+array1 = result1
+array2 = result2
 
 
 # Plot comparison
