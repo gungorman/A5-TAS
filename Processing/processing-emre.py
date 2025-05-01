@@ -377,12 +377,15 @@ def filter_flights_by_location(flight_data, target_lon, target_lat, radius):
 # target_lon, target_lat = 5.75, 51.5
 # radius = 0.5
 # passing, others = filter_flights_by_location(flight_data, target_lon, target_lat, radius)
-sample_rate = 1
+sample_rate = 40
 
 ### ESSA_LFPG ###
 output_ESSA_LFPG = numpy_array_sampled(r"C:\Users\gungo\Downloads\ESSA_LFPG.csv", sample_rate)
 ESSA_LFPG_train_array, ESSA_LFPG_test_array , ESSA_LFPG_val_array = array_split_seed(output_ESSA_LFPG)
-
+target_long = 10.5
+target_lat = 48.5
+radius = 0.4
+ESSA_LFPG_train_filtered = filter_flights_by_location(ESSA_LFPG_train_array, target_long, target_lat, radius)
 output_dir = r"C:\Users\gungo\OneDrive\Desktop\A05 Data"  # Use raw string to avoid escaping backslashes
 
 # Define the full paths for the output files
@@ -408,8 +411,8 @@ LOWW_EGLL_val_file = f"{output_dir}/LOWW_EGLL_val_data_n={sample_rate}.npz"
 ### EHAM_LIMC ###
 output_EHAM_LIMC = numpy_array_sampled(r"C:\Users\gungo\Downloads\EHAM_LIMC.csv", sample_rate)
 EHAM_LIMC_train_array, EHAM_LIMC_test_array , EHAM_LIMC_val_array = array_split_seed(output_EHAM_LIMC)
-target_long = 4.75
-target_lat = 51.5
+target_long = 10.5
+target_lat = 48.5
 radius = 0.4
 EHAM_LIMC_train_filtered = filter_flights_by_location(EHAM_LIMC_train_array, target_long, target_lat, radius)
 
@@ -423,19 +426,20 @@ EHAM_LIMC_train_filtered_file = f"{output_dir}/EHAM_LIMC_train_filtered_data_n={
 
 #save_arrays_to_npz(EHAM_LIMC_train_array, EHAM_LIMC_test_array, EHAM_LIMC_val_array, EHAM_LIMC_train_file, EHAM_LIMC_test_file, EHAM_LIMC_val_file)
 #single_save_array_to_npz(EHAM_LIMC_train_filtered,EHAM_LIMC_train_filtered_file)
-result1 = load_single_array(r"C:\Users\gungo\Downloads\ESSA_LFPG_val_data_n=20.npz", "data")
-print(result1.shape)
-result2 = load_single_array(r"C:\Users\gungo\Downloads\timeVAE_ESSA_LFPG_train_data_n=20_Generated.npz", "data")
-print(result2.shape)
-array1 = result1
-array2 = result2
+#result1 = load_single_array(r"C:\Users\gungo\Downloads\ESSA_LFPG_val_data_n=20.npz", "data")
+#print(result1.shape)
+#result2 = load_single_array(r"C:\Users\gungo\Downloads\timeVAE_ESSA_LFPG_train_data_n=20_Generated.npz", "data")
+#print(result2.shape)
+array1 = LOWW_EGLL_train_array
+array2 = ESSA_LFPG_train_array
+print(f'flitered shape: {ESSA_LFPG_train_filtered.shape} ')
 
 
 # Plot comparison
 plot_trajectories_comparison(
     array1, 
     array2,
-    titles=('Original Trajectories', 'Generated Trajectories'),
+    titles=('Original Training Trajectories', 'Filtered Trajectories'),
     figsize=(18, 7)
 )
 
