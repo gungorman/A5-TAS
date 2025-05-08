@@ -2,6 +2,7 @@
 import os, warnings
 import numpy as np
 import time
+import matplotlib as plt
 
 
 from data_utils import (
@@ -23,6 +24,8 @@ from vae.vae_utils import (
     load_vae_model,
 )
 from visualize import plot_samples, plot_latent_space_samples, visualize_and_save_tsne
+from Validation.ACD import autocorrelation, compute_acd, compute_speed_magnitude
+
 
 nr_epochs=100
 
@@ -130,6 +133,44 @@ def run_vae_pipeline(dataset_name: str, vae_type: str):
     )
 
     # ----------------------------------------------------------------------------------
+
+        # ----------------------------------------------------------------------------------
+    # ACD Plot: Autocorrelation Difference of generated vs real flight data
+
+    try:
+        max_lag = 200
+
+        real_flight = train_data  # unscaled original data
+        fake_flight = inverse_scaled_prior_samples  # generated data, also unscaled
+
+        acd_values = compute_acd(real_flight, fake_flight, max_lag)
+        print(f"Mean ACD over {max_lag} lags: {np.mean(acd_values):.4f}")
+
+        real_speed = compute_speed_magnitude(real_flight)
+        fake_speed = compute_speed_magnitude(fake_flight)
+
+        real_speed_acf = autocorrelation(real_speed, max_lag)
+        fake_speed_acf = autocorrelation(fake_speed, max_lag)
+        acd_speed = np.abs(real_speed_acf - fake_speed_acf)
+
+        plt.figure(figsize=(10, 5))
+        plt.plot(acd_values, label="ACD (Lat, Long, Alt)", color="blue")
+        plt.plot(acd_speed, label="ACD (Speed)", color="red", linestyle="dashed")
+        plt.xlabel("Lag")
+        plt.ylabel("Autocorrelation Difference")
+        plt.legend()
+        plt.title(f"ACD Plot - {vae_type} on {dataset_name}")
+        plt.tight_layout()
+
+        # Save ACD plot
+        acd_plot_path = os.path.join(paths.TSNE_DIR, dataset_name, f"{vae_type}_acd_plot.png")
+        os.makedirs(os.path.dirname(acd_plot_path), exist_ok=True)
+        plt.savefig(acd_plot_path)
+        plt.show()
+
+    except Exception as e:
+        print("Could not compute ACD plot:", e)
+
 
 
 if __name__ == "__main__":
