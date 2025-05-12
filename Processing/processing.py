@@ -98,9 +98,9 @@ def load_single_array(npz_file_path, array_name):
     except FileNotFoundError:
         raise FileNotFoundError(f"File not found: {npz_file_path}")
     
-result1 = load_single_array(r"C:\Users\gungo\Downloads\ESSA_LFPG_val_data_alt_filtered_n=40.npz", "data")
+result1 = load_single_array(r"C:\Users\gungo\Downloads\EHAM_LIMC_train_dataa_n=40.npz", "data")
 print(result1.shape)
-result2 = load_single_array(r"C:\Users\gungo\Downloads\timeVAE_ESSA_LFPG_train_data_alt_filtered_n=40_generated_samples.npz", "data")
+result2 = load_single_array(r"C:\Users\gungo\OneDrive\Desktop\A05 Data\EHAM_LIMC_train_filtered_data_final_n=40.npz", "data")
 print(result2.shape)
 array1 = result1
 array2 = result2
@@ -110,6 +110,6 @@ array2 = result2
 plot_trajectories_comparison(
     array1, 
     array2,
-    titles=('Filtered Validation Trajectories', 'Filtered Generated Trajectories'),
+    titles=('Unfiltered Trajectories', 'Filtered Trajectories'),
     figsize=(18, 7)
 )

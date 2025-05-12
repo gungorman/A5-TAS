@@ -429,6 +429,48 @@ def filter_trajectories_by_altitude(trajectories, max_altitude, after_time, time
     
     return trajectories[keep_mask]
 
+
+
+def compare_altitude_vs_time(trajectories1, trajectories2, 
+                            title1="Altitude vs Time - Set 1", 
+                            title2="Altitude vs Time - Set 2"):
+    """
+    Plot two sets of altitude vs time flight trajectories side by side.
+    
+    Parameters:
+    - trajectories1: First numpy array of shape (num_flights, num_timesteps, 4)
+                   where features are [latitude, longitude, altitude, timedelta]
+    - trajectories2: Second numpy array of same shape for comparison
+    - title1: string for the first plot title
+    - title2: string for the second plot title
+    """
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(21, 6))  # Slightly wider figure
+    
+    # Plot first set of trajectories
+    for i, flight in enumerate(trajectories1):
+        altitude = flight[:, 2]
+        timedelta = flight[:, 3]
+        ax1.plot(timedelta, altitude, alpha=0.7)
+    
+    ax1.set_xlabel('timedelta [seconds]', labelpad=10)  # More padding for xlabel
+    ax1.set_ylabel('Altitude [feet]', labelpad=10)      # More padding for ylabel
+    ax1.set_title(title1, pad=15)                      # More padding for title
+    ax1.grid(True)
+    
+    # Plot second set of trajectories
+    for i, flight in enumerate(trajectories2):
+        altitude = flight[:, 2]
+        timedelta = flight[:, 3]
+        ax2.plot(timedelta, altitude, alpha=0.7)
+    
+    ax2.set_xlabel('timedelta [seconds]', labelpad=10)  # More padding for xlabel
+    ax2.set_ylabel('Altitude [feet]', labelpad=10)      # More padding for ylabel
+    ax2.set_title(title2, pad=15)                      # More padding for title
+    ax2.grid(True)
+    
+    plt.tight_layout(pad=3.0)  # Increased padding around subplots
+    plt.show()
+
 # # Example usage:
 # flight_data = np.array(...)  # Your flight data array
 # target_lon, target_lat = 5.75, 51.5
@@ -487,23 +529,27 @@ output_dir = r"C:\Users\gungo\OneDrive\Desktop\A05 Data"  # Use raw string to av
 #print(result1.shape)
 #result2 = load_single_array(r"C:\Users\gungo\Downloads\timeVAE_ESSA_LFPG_train_data_n=20_Generated.npz", "data")
 #print(result2.shape)
-array1 = load_single_array(r"C:\Users\gungo\OneDrive\Desktop\A05 Data\EHAM_LIMC_val_filtered_data_pre_n=40.npz", "data")
+array1 = load_single_array(r"C:\Users\gungo\Downloads\ESSA_LFPG_train_data_n=40.npz", "data")
 target_long = 4.75
 target_lat = 51.5
 radius = 0.4
-# array2 = filter_trajectories_by_altitude(array1, 11000, 7000, time_unit='seconds')
-array2 = filter_flights_by_location(array1, target_long, target_lat, radius)
+array2 = filter_trajectories_by_altitude(array1, 11000, 7000, time_unit='seconds')
+#array2 = filter_flights_by_location(array1, target_long, target_lat, radius)
 print(f'flitered shape: {array1.shape} ')
 print(f'flitered shape: {array2.shape} ')
 save_location = f"{output_dir}/EHAM_LIMC_val_filtered_data_final_n={sample_rate}.npz"
-single_save_array_to_npz(array2,save_location)
+#single_save_array_to_npz(array2,save_location)
 
 # Plot comparison
-plot_trajectories_comparison(
-    array1, 
-    array2,
-    titles=('Original Training Trajectories', 'Filtered Trajectories'),
-    figsize=(18, 7)
-)
+# plot_trajectories_comparison(
+#     array1, 
+#     array2,
+#     titles=('Original Training Trajectories', 'Filtered Trajectories'),
+#     figsize=(18, 7)
+# )
 
-# plot_altitude_vs_time(array2, title="Altitude vs Time for Flight Trajectories")
+#plot_altitude_vs_time(array2, title="Altitude vs Time for Flight Trajectories")
+
+compare_altitude_vs_time(array1, array2, 
+                            title1="Unfiltered Trajectories", 
+                            title2="Filtered Trajectories")
