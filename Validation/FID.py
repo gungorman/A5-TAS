@@ -7,14 +7,44 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.linalg import sqrtm
 
+## Available routes
+## EHAM_LIMC
+## ESSA_LFPG
+## LOWW_EGLL
+
+## ESSA_LFPG_2 (filtered for going up trajectories)
+
+## Comparison options
+## val
+## train
+## test
+
 ## Import the data EDIT THE ROUTE
-route = "ESSA_LFPG"
-n = 20
+route = "EHAM_LIMC"
+n = 40
+filtered = True
+compared = "test"
+L = 10
 
-r_data_npz = np.load('C:/Sofia/TU Delft/Bsc2/Proyect/second semester/' + str(route) + '_train_data_n=' + str(n) + '.npz')
-s_data_npz = np.load('C:/Sofia/TU Delft/Bsc2/Proyect/second semester/' + str(route) + '_gen_data_n=' + str(n) + '.npz')
+direction_compared = "C:/Sofia/TU Delft/Bsc2/Proyect/second semester/" + str(route) + "_" + compared + "_data_n=" + str(n)
+direction_gen = "C:/Sofia/TU Delft/Bsc2/Proyect/second semester/" + str(route) + "_gen_data_n=" + str(n)
 
-r_data = r_data_npz['data']
+if L != 0:
+    direction_gen = direction_gen + '_L=' + str(L)
+
+if filtered:
+    direction_compared = direction_compared + '_filtered.npz'
+    direction_gen = direction_gen + '_filtered.npz'
+else:
+    direction_compared = direction_compared + '.npz'
+    direction_gen = direction_gen + '.npz'
+
+r_data_npz = np.load(direction_compared)
+s_data_npz = np.load(direction_gen)
+
+key = r_data_npz.files[0]
+
+r_data = r_data_npz[key]
 s_data = s_data_npz['data']
 
 r_data = [item for sublist in r_data for item in sublist]
@@ -92,7 +122,7 @@ print("FID mean:", np.mean(fid[0])) ## mean FID for single valued comparison
 plt.figure(figsize=(12, 6))
 plt.subplot(1, 2, 1)
 plt.plot(fid[0])
-plt.title('FID Scores')
+plt.title('FID Scores - ' + str(route))
 plt.xlabel('Datapoint')
 plt.ylabel('FID Score')
 

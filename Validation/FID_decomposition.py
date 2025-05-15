@@ -7,27 +7,49 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.linalg import sqrtm
 
+## Available routes
+## EHAM_LIMC
+## ESSA_LFPG
+## LOWW_EGLL
+
+## Comparison options
+## val
+## train
+## test
+
 ## Import the data EDIT THE ROUTE
-route = "LOWW_EGLL"
-n = 20
+route = "EHAM_LIMC"
+n = 40
+filtered = True
+compared = "test"
+L = 10
 
-r_data_npz = np.load('C:/Sofia/TU Delft/Bsc2/Proyect/second semester/' + str(route) + '_val_data_n=' + str(n) + '.npz')
-s_data_npz = np.load('C:/Sofia/TU Delft/Bsc2/Proyect/second semester/' + str(route) + '_gen_data_n=' + str(n) + '.npz')
+direction_compared = "C:/Sofia/TU Delft/Bsc2/Proyect/second semester/" + str(route) + "_" + compared + "_data_n=" + str(n)
+direction_gen = "C:/Sofia/TU Delft/Bsc2/Proyect/second semester/" + str(route) + "_gen_data_n=" + str(n)
+if L != 0:
+    direction_gen = direction_gen + '_L=' + str(L)
 
-r_data = r_data_npz['val']
+if filtered:
+    direction_compared = direction_compared + '_filtered.npz'
+    direction_gen = direction_gen + '_filtered.npz'
+else:
+    direction_compared = direction_compared + '.npz'
+    direction_gen = direction_gen + '.npz'
+
+print(direction_gen)
+print(direction_compared)
+
+r_data_npz = np.load(direction_compared)
+s_data_npz = np.load(direction_gen)
+
+r_data = r_data_npz[r_data_npz.files[0]]
 s_data = s_data_npz['data']
 
 r_data = [item for sublist in r_data for item in sublist]
 s_data = [item for sublist in s_data for item in sublist]
-## Stuff for validating the tool
 
 def FID(real_data, synth_data):
-    ## Clean the data to obtain an array with just the 4 relevant info
-    #real_data = np.delete(real_data, 0, 0)
-    #real_data = np.delete(real_data, np.s_[4:], 1)
-    #synth_data = np.delete(synth_data, 0, 0)
-    #synth_data = np.delete(synth_data, np.s_[4:], 1)
-    ## look for start of trajectories
+
     real_index = []
     synth_index = []
     for i in range(len(real_data)):
@@ -77,32 +99,32 @@ def FID_dtp(real_dtp, synth_dtp):
     real_cov = np.cov(real_dtp, rowvar=False)
     synth_cov = np.cov(synth_dtp, rowvar=False)
 
-    #Calculate FID
+    # Calculate FID
     mean_diff = real_means_dtp - synth_means_dtp
     cov_mean = sqrtm(np.dot(real_cov, synth_cov))
     if np.iscomplexobj(cov_mean):
         cov_mean = cov_mean.real
     
-    fid_score1 = np.sum(mean_diff**2)
-    fid_score2 = np.trace(real_cov + synth_cov - 2 * cov_mean)
+    fid_mean = np.sum(mean_diff**2)
+    fid_std = np.trace(real_cov + synth_cov - 2 * cov_mean)
 
-    return fid_score1, fid_score2, real_means_dtp, synth_means_dtp
+    return fid_mean, fid_std, real_means_dtp, synth_means_dtp
 
 fid = FID(r_data,s_data)
 
-print("FID mean:", np.mean(fid[0])) ## mean FID for single valued comparison
+print("FID mean:", np.mean(fid[0])) ## Mean FID for single valued comparison
 # Plot FID scores
 plt.figure(figsize=(12, 6))
 plt.subplot(1, 2, 1)
 plt.plot(fid[0])
-plt.title('FID Scores for means')
+plt.title('FID Scores for means - '+ str(route))
 plt.xlabel('Datapoint')
 plt.ylabel('FID Score')
 
 # Plot real and synthetic trajectory altitud means
 plt.subplot(1, 2, 2)
-plt.plot(fid[1], label='FID Scores for means')
-plt.title('FID scores for spread')
+plt.plot(fid[1])
+plt.title('FID scores for spread - '+ str(route))
 plt.xlabel('Datapoint')
 plt.ylabel('FID score')
 plt.legend()
