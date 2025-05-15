@@ -369,73 +369,187 @@ def filter_flights_by_location(flight_data, target_lon, target_lat, radius):
     
     # Separate the flights
     passing_flights = flight_data[passing_indices]
+    other_flights = np.delete(flight_data, passing_indices, axis=0)
     
-    return passing_flights
+    return other_flights
 
-# Example usage:
+def plot_altitude_vs_time(trajectories, title="Altitude vs Time for Flight Trajectories"):
+    """
+    Plot altitude against timedelta for multiple flight trajectories.
+    
+    Parameters:
+    - trajectories: numpy array of shape (num_flights, num_timesteps, 4)
+                   where features are [latitude, longitude, altitude, timedelta]
+    - title: string for the plot title
+    """
+    plt.figure(figsize=(10, 6))
+    
+    # Plot each flight trajectory
+    for i, flight in enumerate(trajectories):
+        # Extract altitude (index 2) and timedelta (index 3)
+        altitude = flight[:, 2]
+        timedelta = flight[:, 3]
+        
+        plt.plot(timedelta, altitude, alpha=0.7)
+    
+    plt.xlabel('timedelta [seconds]')
+    plt.ylabel('Altitude [feet]')
+    plt.title(title)
+    plt.grid(True)
+    plt.tight_layout()
+    plt.show()
+
+def filter_trajectories_by_altitude(trajectories, max_altitude, after_time, time_unit='seconds'):
+    """
+    Filter trajectories to keep only those that don't exceed max_altitude after specified time.
+    Returns only the filtered trajectories array.
+    
+    Parameters:
+    - trajectories: numpy array of shape (num_flights, num_timesteps, 4)
+                   where features are [latitude, longitude, altitude, timedelta]
+    - max_altitude: maximum allowed altitude in meters
+    - after_time: time threshold (in specified units) after which to check altitude
+    - time_unit: unit of after_time ('seconds', 'minutes', or 'hours')
+    
+    Returns:
+    - filtered_trajectories: array with same shape structure containing only compliant flights
+    """
+    # Convert after_time to seconds
+    after_time_seconds = {
+        'seconds': after_time,
+        'minutes': after_time * 60,
+        'hours': after_time * 3600
+    }[time_unit]
+    
+    # Boolean mask of flights to keep
+    keep_mask = [
+        not np.any(flight[flight[:, 3] >= after_time_seconds, 2] > max_altitude)
+        for flight in trajectories
+    ]
+    
+    return trajectories[keep_mask]
+
+
+
+def compare_altitude_vs_time(trajectories1, trajectories2, 
+                            title1="Altitude vs Time - Set 1", 
+                            title2="Altitude vs Time - Set 2"):
+    """
+    Plot two sets of altitude vs time flight trajectories side by side.
+    
+    Parameters:
+    - trajectories1: First numpy array of shape (num_flights, num_timesteps, 4)
+                   where features are [latitude, longitude, altitude, timedelta]
+    - trajectories2: Second numpy array of same shape for comparison
+    - title1: string for the first plot title
+    - title2: string for the second plot title
+    """
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(21, 6))  # Slightly wider figure
+    
+    # Plot first set of trajectories
+    for i, flight in enumerate(trajectories1):
+        altitude = flight[:, 2]
+        timedelta = flight[:, 3]
+        ax1.plot(timedelta, altitude, alpha=0.7)
+    
+    ax1.set_xlabel('timedelta [seconds]', labelpad=10)  # More padding for xlabel
+    ax1.set_ylabel('Altitude [feet]', labelpad=10)      # More padding for ylabel
+    ax1.set_title(title1, pad=15)                      # More padding for title
+    ax1.grid(True)
+    
+    # Plot second set of trajectories
+    for i, flight in enumerate(trajectories2):
+        altitude = flight[:, 2]
+        timedelta = flight[:, 3]
+        ax2.plot(timedelta, altitude, alpha=0.7)
+    
+    ax2.set_xlabel('timedelta [seconds]', labelpad=10)  # More padding for xlabel
+    ax2.set_ylabel('Altitude [feet]', labelpad=10)      # More padding for ylabel
+    ax2.set_title(title2, pad=15)                      # More padding for title
+    ax2.grid(True)
+    
+    plt.tight_layout(pad=3.0)  # Increased padding around subplots
+    plt.show()
+
+# # Example usage:
 # flight_data = np.array(...)  # Your flight data array
 # target_lon, target_lat = 5.75, 51.5
 # radius = 0.5
 # passing, others = filter_flights_by_location(flight_data, target_lon, target_lat, radius)
-sample_rate = 1
+sample_rate = 40
 
-### ESSA_LFPG ###
-output_ESSA_LFPG = numpy_array_sampled(r"C:\Users\gungo\Downloads\ESSA_LFPG.csv", sample_rate)
-ESSA_LFPG_train_array, ESSA_LFPG_test_array , ESSA_LFPG_val_array = array_split_seed(output_ESSA_LFPG)
+# ### ESSA_LFPG ###
+# output_ESSA_LFPG = numpy_array_sampled(r"C:\Users\gungo\Downloads\ESSA_LFPG.csv", sample_rate)
+# ESSA_LFPG_train_array, ESSA_LFPG_test_array , ESSA_LFPG_val_array = array_split_seed(output_ESSA_LFPG)
+# target_long = 10.5
+# target_lat = 48.5
+# radius = 0.4
+# ESSA_LFPG_train_filtered = filter_flights_by_location(ESSA_LFPG_train_array, target_long, target_lat, radius)
+# output_dir = r"C:\Users\gungo\OneDrive\Desktop\A05 Data"  # Use raw string to avoid escaping backslashes
+
+# # Define the full paths for the output files
+# ESSA_LFPG_train_file = f"{output_dir}/ESSA_LFPG_train_data_n={sample_rate}.npz"
+# ESSA_LFPG_test_file = f"{output_dir}/ESSA_LFPG_test_data_n={sample_rate}.npz"
+# ESSA_LFPG_val_file = f"{output_dir}/ESSA_LFPG_val_data_n={sample_rate}.npz"
+
+# #save_arrays_to_npz(ESSA_LFPG_train_array, ESSA_LFPG_test_array, ESSA_LFPG_val_array, ESSA_LFPG_train_file, ESSA_LFPG_test_file, ESSA_LFPG_val_file)
+
+# ### LOWW_EGLL ###
+# output_LOWW_EGLL = numpy_array_sampled(r"C:\Users\gungo\Downloads\LOWW_EGLL.csv", sample_rate)
+# LOWW_EGLL_train_array, LOWW_EGLL_test_array , LOWW_EGLL_val_array = array_split_seed(output_LOWW_EGLL)
+
+# output_dir = r"C:\Users\gungo\OneDrive\Desktop\A05 Data"  # Use raw string to avoid escaping backslashes
+
+# # Define the full paths for the output files
+# LOWW_EGLL_train_file = f"{output_dir}/LOWW_EGLL_train_data_n={sample_rate}.npz"
+# LOWW_EGLL_test_file = f"{output_dir}/LOWW_EGLL_test_data_n={sample_rate}.npz"
+# LOWW_EGLL_val_file = f"{output_dir}/LOWW_EGLL_val_data_n={sample_rate}.npz"
+
+# #save_arrays_to_npz(LOWW_EGLL_train_array, LOWW_EGLL_test_array, LOWW_EGLL_val_array, LOWW_EGLL_train_file, LOWW_EGLL_test_file, LOWW_EGLL_val_file)
+
+# ### EHAM_LIMC ###
+# output_EHAM_LIMC = numpy_array_sampled(r"C:\Users\gungo\Downloads\EHAM_LIMC.csv", sample_rate)
+# EHAM_LIMC_train_array, EHAM_LIMC_test_array , EHAM_LIMC_val_array = array_split_seed(output_EHAM_LIMC)
+# target_long = 10.5
+# target_lat = 48.5
+# radius = 0.4
+# EHAM_LIMC_train_filtered = filter_flights_by_location(EHAM_LIMC_train_array, target_long, target_lat, radius)
 
 output_dir = r"C:\Users\gungo\OneDrive\Desktop\A05 Data"  # Use raw string to avoid escaping backslashes
 
-# Define the full paths for the output files
-ESSA_LFPG_train_file = f"{output_dir}/ESSA_LFPG_train_data_n={sample_rate}.npz"
-ESSA_LFPG_test_file = f"{output_dir}/ESSA_LFPG_test_data_n={sample_rate}.npz"
-ESSA_LFPG_val_file = f"{output_dir}/ESSA_LFPG_val_data_n={sample_rate}.npz"
-
-#save_arrays_to_npz(ESSA_LFPG_train_array, ESSA_LFPG_test_array, ESSA_LFPG_val_array, ESSA_LFPG_train_file, ESSA_LFPG_test_file, ESSA_LFPG_val_file)
-
-### LOWW_EGLL ###
-output_LOWW_EGLL = numpy_array_sampled(r"C:\Users\gungo\Downloads\LOWW_EGLL.csv", sample_rate)
-LOWW_EGLL_train_array, LOWW_EGLL_test_array , LOWW_EGLL_val_array = array_split_seed(output_LOWW_EGLL)
-
-output_dir = r"C:\Users\gungo\OneDrive\Desktop\A05 Data"  # Use raw string to avoid escaping backslashes
-
-# Define the full paths for the output files
-LOWW_EGLL_train_file = f"{output_dir}/LOWW_EGLL_train_data_n={sample_rate}.npz"
-LOWW_EGLL_test_file = f"{output_dir}/LOWW_EGLL_test_data_n={sample_rate}.npz"
-LOWW_EGLL_val_file = f"{output_dir}/LOWW_EGLL_val_data_n={sample_rate}.npz"
-
-#save_arrays_to_npz(LOWW_EGLL_train_array, LOWW_EGLL_test_array, LOWW_EGLL_val_array, LOWW_EGLL_train_file, LOWW_EGLL_test_file, LOWW_EGLL_val_file)
-
-### EHAM_LIMC ###
-output_EHAM_LIMC = numpy_array_sampled(r"C:\Users\gungo\Downloads\EHAM_LIMC.csv", sample_rate)
-EHAM_LIMC_train_array, EHAM_LIMC_test_array , EHAM_LIMC_val_array = array_split_seed(output_EHAM_LIMC)
-target_long = 4.75
-target_lat = 51.5
-radius = 0.4
-EHAM_LIMC_train_filtered = filter_flights_by_location(EHAM_LIMC_train_array, target_long, target_lat, radius)
-
-output_dir = r"C:\Users\gungo\OneDrive\Desktop\A05 Data"  # Use raw string to avoid escaping backslashes
-
-# Define the full paths for the output files
-EHAM_LIMC_train_file = f"{output_dir}/EHAM_LIMC_train_data_n={sample_rate}.npz"
-EHAM_LIMC_test_file = f"{output_dir}/EHAM_LIMC_test_data_n={sample_rate}.npz"
-EHAM_LIMC_val_file = f"{output_dir}/EHAM_LIMC_val_data_n={sample_rate}.npz"
-EHAM_LIMC_train_filtered_file = f"{output_dir}/EHAM_LIMC_train_filtered_data_n={sample_rate}.npz"
+# # Define the full paths for the output files
+# EHAM_LIMC_train_file = f"{output_dir}/EHAM_LIMC_train_data_n={sample_rate}.npz"
+# EHAM_LIMC_test_file = f"{output_dir}/EHAM_LIMC_test_data_n={sample_rate}.npz"
+# EHAM_LIMC_val_file = f"{output_dir}/EHAM_LIMC_val_data_n={sample_rate}.npz"
+# EHAM_LIMC_train_filtered_file = f"{output_dir}/EHAM_LIMC_train_filtered_data_n={sample_rate}.npz"
 
 #save_arrays_to_npz(EHAM_LIMC_train_array, EHAM_LIMC_test_array, EHAM_LIMC_val_array, EHAM_LIMC_train_file, EHAM_LIMC_test_file, EHAM_LIMC_val_file)
 #single_save_array_to_npz(EHAM_LIMC_train_filtered,EHAM_LIMC_train_filtered_file)
-result1 = load_single_array(r"C:\Users\gungo\Downloads\ESSA_LFPG_val_data_n=20.npz", "data")
-print(result1.shape)
-result2 = load_single_array(r"C:\Users\gungo\Downloads\timeVAE_ESSA_LFPG_train_data_n=20_Generated.npz", "data")
-print(result2.shape)
-array1 = result1
-array2 = result2
-
+#result1 = load_single_array(r"C:\Users\gungo\Downloads\ESSA_LFPG_val_data_n=20.npz", "data")
+#print(result1.shape)
+#result2 = load_single_array(r"C:\Users\gungo\Downloads\timeVAE_ESSA_LFPG_train_data_n=20_Generated.npz", "data")
+#print(result2.shape)
+array1 = load_single_array(r"C:\Users\gungo\Downloads\ESSA_LFPG_train_data_n=40.npz", "data")
+target_long = 4.75
+target_lat = 51.5
+radius = 0.4
+array2 = filter_trajectories_by_altitude(array1, 11000, 7000, time_unit='seconds')
+#array2 = filter_flights_by_location(array1, target_long, target_lat, radius)
+print(f'flitered shape: {array1.shape} ')
+print(f'flitered shape: {array2.shape} ')
+save_location = f"{output_dir}/EHAM_LIMC_val_filtered_data_final_n={sample_rate}.npz"
+#single_save_array_to_npz(array2,save_location)
 
 # Plot comparison
-plot_trajectories_comparison(
-    array1, 
-    array2,
-    titles=('Original Trajectories', 'Generated Trajectories'),
-    figsize=(18, 7)
-)
+# plot_trajectories_comparison(
+#     array1, 
+#     array2,
+#     titles=('Original Training Trajectories', 'Filtered Trajectories'),
+#     figsize=(18, 7)
+# )
 
+#plot_altitude_vs_time(array2, title="Altitude vs Time for Flight Trajectories")
+
+compare_altitude_vs_time(array1, array2, 
+                            title1="Unfiltered Trajectories", 
+                            title2="Filtered Trajectories")

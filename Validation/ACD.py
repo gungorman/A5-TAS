@@ -3,6 +3,27 @@ import matplotlib.pyplot as plt
 
 #import NPZ file here for generated data
 
+## Import the data EDIT THE ROUTE
+route = "EHAM_LIMC"
+n = 20
+
+#TimeVAE/outputs/gen_data/EHAM_LIMC_train_dataa_n=20
+#TimeVAE\data\EHAM_LIMC_train_dataa_n=20.npz
+
+
+real_data_npz = np.load(r"C:\Users\solif\Desktop\folderfolder\EHAM_LIMC_test_data_n=40_filtered.npz")
+fake_data_npz = np.load(r"C:\Users\solif\Desktop\folderfolder\EHAM_LIMC_gen_data_n=40_L=10_filtered.npz")
+
+real_data = real_data_npz['val']
+fake_data = fake_data_npz['data']
+
+r_data = [item for sublist in real_data for item in sublist]
+s_data = [item for sublist in fake_data for item in sublist]
+
+r_data = np.array(r_data)
+s_data = np.array(s_data)
+
+
 
 
 def autocorrelation(series, max_lag):
@@ -36,12 +57,12 @@ def compute_speed_magnitude(data):
 max_lag = 200
 
 # Compute ACD
-acd_values = compute_acd(real_flight, fake_flight, max_lag)
+acd_values = compute_acd(r_data, s_data, max_lag)
 print(f"Mean ACD over {max_lag} lags:", np.mean(acd_values))
 
 # Compute speed autocorrelation
-real_speed = compute_speed_magnitude(real_flight)
-fake_speed = compute_speed_magnitude(fake_flight)
+real_speed = compute_speed_magnitude(r_data)
+fake_speed = compute_speed_magnitude(s_data)
 
 real_speed_acf = autocorrelation(real_speed, max_lag)
 fake_speed_acf = autocorrelation(fake_speed, max_lag)
