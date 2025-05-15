@@ -11,8 +11,8 @@ n = 20
 #TimeVAE\data\EHAM_LIMC_train_dataa_n=20.npz
 
 
-real_data_npz = np.load(r"C:\Users\solif\Desktop\folderfolder\ESSA_LFPG_val_data_n=40.npz")
-fake_data_npz = np.load(r"C:\Users\solif\Desktop\folderfolder\ESSA_LFPG_gen_data_n=40_L=50.npz")
+real_data_npz = np.load(r"C:\Users\solif\Desktop\folderfolder\EHAM_LIMC_test_data_n=40_filtered.npz")
+fake_data_npz = np.load(r"C:\Users\solif\Desktop\folderfolder\EHAM_LIMC_gen_data_n=40_L=10_filtered.npz")
 
 real_data = real_data_npz['val']
 fake_data = fake_data_npz['data']
